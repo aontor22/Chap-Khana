@@ -1,0 +1,20 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CalendarDays, LogOut, Package, ShieldCheck, UserRound } from 'lucide-react';
+import { useShop } from '../context/ShopContext';
+import { getMyOrders } from '../data/api';
+import { money, waitError } from '../lib/utils';
+import type { Order } from '../types';
+export default function Account(){
+  const {user,authLoading,t,signInGoogle,signOut,live,notify}=useShop();const [orders,setOrders]=useState<Order[]>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
+  useEffect(()=>{if(!user){setOrders([]);return;}let alive=true;setLoading(true);void getMyOrders(user.id).then(o=>{if(alive)setOrders(o);}).catch(e=>{if(alive)setError(waitError(e));}).finally(()=>{if(alive)setLoading(false);});return()=>{alive=false;};},[user]);
+  const handleLogin=()=>{void signInGoogle('/account').catch(e=>notify(waitError(e)));};
+  return <section className="site-wrap page-pad max-w-4xl"><div className="section-kicker"><span/> YOUR PROFILE</div><h1 className="page-title">{t.account}<span className="text-ember">.</span></h1>
+    {authLoading?<div className="panel p-10 mt-9">Checking account session…</div>:!user?<div className="panel account-promo mt-9"><div className="icon-large"><UserRound size={32}/></div><h2 className="text-2xl font-bold mt-4">Sign in, stay in the loop.</h2><p className="text-[#807268] my-5 max-w-lg">{t.loggedOut} Google sign-in uses Supabase Auth. Guest orders can still be tracked using their token.</p><button className="google-button" onClick={handleLogin} disabled={!live}><span className="google-g">G</span>{t.login}</button>{!live&&<p className="text-xs text-[#a57e6c] mt-4">Connect Supabase to enable Google Sign-In.</p>}</div>:
+    <><div className="panel mt-9 p-6 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><div className="account-avatar"><UserRound size={26}/></div><div><strong className="text-xl">{user.user_metadata?.full_name||user.email}</strong><p className="text-[#8c7c70] text-sm">{user.email}</p></div></div><button onClick={()=>void signOut().catch(e=>notify(waitError(e)))} className="btn-secondary"><LogOut size={17}/>{t.logout}</button></div>
+      <div className="flex items-center justify-between mt-10 mb-4"><h2 className="text-2xl font-bold flex items-center gap-3"><Package size={22}/>{t.myOrders}</h2><span className="text-sm text-[#a49488]">{orders.length} orders</span></div>{error&&<div className="notice-error" role="alert">{error}</div>}
+      {loading?<div className="panel p-10">Loading your orders…</div>:orders.length===0?<div className="empty-state"><Package size={35} className="mx-auto text-ember"/><p className="mt-4">{t.noOrders}</p><Link to="/menu" className="btn-primary inline-flex mt-5">{t.browse}<ArrowRight size={17}/></Link></div>:<div className="space-y-4">{orders.map(o=><div className="panel p-6" key={o.id}><div className="flex flex-wrap justify-between items-center gap-3"><div><span className="eyebrow">{o.code}</span><p className="font-bold mt-2 text-lg">{o.order_items?.map(i=>`${i.qty}× ${i.item_name}`).join(', ')||'Order'}</p><p className="text-sm text-[#93867d] flex items-center gap-2 mt-2"><CalendarDays size={15}/>{new Date(o.created_at).toLocaleString('en-BD')}</p></div><div className="text-right"><strong>{money(o.total)}</strong><p className="text-sm text-ember font-bold capitalize mt-1">{o.status.replaceAll('_',' ')}</p><Link className="text-sm underline inline-flex items-center gap-1 mt-2" to={`/track?token=${o.tracking_token}`}>Track <ArrowRight size={14}/></Link></div></div></div>)}</div>}
+      <div className="text-sm text-[#80756e] flex items-start gap-3 mt-9"><ShieldCheck size={19}/> Only orders created while you were signed in are linked to this account.</div>
+    </>}
+  </section>;
+}

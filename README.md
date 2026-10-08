@@ -1,0 +1,122 @@
+# Chap Khana — React + TypeScript restaurant ordering platform
+
+**Version:** 2.0.0 · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
+
+This repository is a component-based rebuild of the prior vanilla-JS Chap Khana showcase/ordering prototype. Includes bilingual storefront, live-priced menu, local demo mode, cart, pickup/delivery checkout, idempotent PostgreSQL RPC, order tracking, Google login, account order history, staff dashboard, menu editor and settings.
+
+**Owner approval is required.** Photos, restaurant hours/contact, brand use and *all prices* are illustrative/unverified until the operator approves them. No payment gateway has been configured.
+
+## Quick start
+
+```bash
+node -v                    # v20.19+ (Node 22 LTS recommended)
+npm install
+cp .env.example .env.local # fill in public URL and publishable key for live mode
+npm run dev
+npm run build
+npm run test
+```
+
+If `.env.local` is missing, the storefront operates in **DEMO MODE** with sample prices, browser-local fake orders and a demo staff panel. **No live order is created in this mode.** With `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` set, DEMO MODE is completely disabled; real menu prices and settings come from Supabase.
+
+## Architecture
+
+```
+src/
+  components/      Shared layout, food product cards
+  context/         Supabase Auth session, menu, cart and locale
+  data/            Typed Supabase data-access layer, local demo data and text
+  lib/             Environment configuration, SDK and validation
+  pages/           Home, cart, checkout, tracking, account, staff dashboard
+  styles/          Tailwind theme & responsive component styling
+supabase/
+  01_fresh_schema.sql                 Run only on an EMPTY database
+  02_existing_google_upgrade.sql     Run only for a pre-Google legacy database
+  migrations/03_production_hardening.sql  Run for both fresh and upgraded DBs
+```
+
+Key security boundaries:
+
+- User-facing prices and order totals are calculated from PostgreSQL, never trusted from the cart.
+- Staff-only write privileges are enforced by Postgres RLS with a server-side membership table. Google sign-in **does not** mean staff access.
+- Customer order history is restricted to `customer_user_id = auth.uid()`; guest order tracking requires an unguessable UUID.
+- The hardening migration limits direct staff writes on orders to the `status` column, enforces status transitions, and records an append-only audit trail.
+- Checkout uses **`place_order_v2`** with a UUID idempotency key to safely retry after an uncertain network response. The database retains the older six-argument RPC for backward compatibility with older deployments.
+- The migration adds a basic per-phone order-frequency check. **Before live launch, add edge/IP rate limiting + CAPTCHA verification, monitoring, legal notices and backups.** This safeguard alone is NOT commercial-grade abuse prevention.
+- All Auth session handling uses `@supabase/supabase-js` (PKCE, refresh token rotation). Secrets never enter the browser.
+
+## Database installation
+
+### New Supabase project
+
+1. Run `supabase/01_fresh_schema.sql` in Supabase SQL Editor.
+2. Run `supabase/migrations/03_production_hardening.sql`.
+3. Leave `accepting_orders=false` until owner-approved menus and anti-abuse measures are in place. Seed dish prices are NULL.
+
+### Existing Chap Khana database
+
+1. **Back up the database first** and test on a staging clone.
+2. If your old database predates Google customer accounts, run `supabase/02_existing_google_upgrade.sql`; otherwise skip it.
+3. Run `supabase/migrations/03_production_hardening.sql`. It does not reset menu or existing orders.
+4. Verify `public.place_order_v2` appears in Supabase's database functions.
+
+### Assign real admin role
+
+Sign in once with Google using the intended owner's email. In Supabase **SQL Editor**, run:
+
+```sql
+insert into public.admin_users(user_id)
+select id from auth.users where lower(email)=lower('OWNER@EXAMPLE.COM')
+on conflict(user_id) do nothing;
+```
+
+Do not execute this SQL from the browser or create public role-assignment APIs.
+
+## Google OAuth setup
+
+1. Google Cloud Console → Google Auth Platform → create OAuth **Web application** credentials.
+2. Authorized redirect URI **must be** `https://YOUR_PROJECT.supabase.co/auth/v1/callback`.
+3. In Supabase → Authentication → Providers → Google: enable Google and enter **Client ID and Client Secret there only**.
+4. Supabase → Authentication → URL Configuration: Site URL = your Vercel production URL, redirect allowlist = `https://YOUR_DOMAIN/auth/callback` plus local `http://localhost:5173/auth/callback` when developing.
+5. Google authorized JavaScript origins: your HTTPS site origin and localhost while developing, if required by your OAuth client.
+6. Supabase's PKCE callback at `/auth/callback` uses the SDK to restore the session. Never place Client Secret in `VITE_*` variables.
+
+## Deploy
+
+### Vercel (recommended)
+- Push the **contents** of this folder to GitHub.
+- Vercel → New Project → import repository.
+- Framework: **Vite**, Root: project root, Build command `npm run build`, Output directory `dist`.
+- Add environment variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` for Production and Preview as applicable.
+- Deploy and configure the EXACT deployed URL in Supabase Auth allowlists.
+- `vercel.json` includes SPA rewrites for React Router and basic security headers.
+
+### Render (optional alternative, not required as a backend)
+- New → **Static Site**, connect GitHub repository.
+- Build: `npm install && npm run build`; Publish directory: `dist`.
+- Add identical `VITE_...` environment variables at build time.
+- Render Static Site URL must be included in Supabase Auth redirect allowlist to use Google login there.
+- Since Supabase serves the database/backend, a separate Render **Web Service** is not needed. A future Express API would require its own secure service.
+
+## Launch checklist
+
+- [ ] Restaurant owner approved public website, actual address, contact, images, menu and prices.
+- [ ] Fresh/staging Supabase migration validated (schema + migration 03).
+- [ ] Menu products have real integer BDT prices; item photos use owner-approved image assets.
+- [ ] Staff memberships tested: non-staff cannot read admin orders or edit settings.
+- [ ] SQL-level acceptance: RPC validates item IDs, duplicate lines, qty, store closed, inactive, unpriced item, total tampering.
+- [ ] Order status transition and audit history checked against real database.
+- [ ] Google OAuth callback, 7-day+ browser session continuity under provider policy, and account order history tested end-to-end.
+- [ ] Edge/IP CAPTCHA and abuse prevention configured before `accepting_orders=true`.
+- [ ] Restaurant's cancellation/refund terms, privacy policy, delivery area, and legal compliance reviewed.
+- [ ] Email/SMS alerts and staff operational processes arranged; until then, staff dashboard polls every 20 seconds.
+- [ ] Backups, error monitoring, analytics (with consent), and alerts established.
+
+## Known boundaries
+
+- Payment is **cash on pickup/delivery only**; no bKash/Nagad/card/online payment capture and no webhook reconciliation.
+- Inventory deduction, taxes, multi-location operations, dispatch and automatic notifications are not implemented.
+- Database policy integration tests need access to a real Supabase instance; no remote database credentials are included.
+- React production build and Vitest require npm packages; no compiled `dist` is committed to this source ZIP.
+
+**Documentation:** [React](https://react.dev/learn) · [Vite](https://vite.dev/guide/) · [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security) · [Google OAuth](https://supabase.com/docs/guides/auth/social-login/auth-google) · [Vercel Vite](https://vercel.com/docs/frameworks/frontend/vite) · [Unsplash license](https://unsplash.com/license).
