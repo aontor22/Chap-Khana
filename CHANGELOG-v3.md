@@ -10,3 +10,9 @@
 - Documented unclear prices, owner approvals, outstanding QA steps and build blocker.
 
 **Status:** Catalog tests and TS/TSX syntax tests passed. Full npm build, browser E2E and live Supabase migration have not been verified in this environment.
+
+
+## v3.1.0
+- Replaced the website brand asset with a transparent PNG wordmark based on the provided printed menu logo.
+- Rebuilt transparent favicon and square brand icons from the same logo family.
+- No menu or database rows were changed in this patch.

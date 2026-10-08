@@ -25,3 +25,6 @@ npm run dev
 ```
 
 Verify the new header/footer logo and the mobile UI at widths 320, 375, 768, 1024, 1440. Test cart, prices, checkout, guest/user order history, session refresh, admin allowlist, and status transitions against a staging Supabase project first. Confirm and deploy the SQL migration before enabling ordering. Never publish an unverified restaurant menu as current without approval.
+
+
+Transparent logo patch: verified updated PNG assets keep alpha transparency in the logo and icon files.
