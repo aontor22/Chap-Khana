@@ -3,8 +3,8 @@ export const dictionary = {
   en: {
     menu: 'Menu', story:'Our story', location:'Find us', track:'Track order', account:'My account', cart:'Cart', open:'Explore the menu',
     headline:'GOOD FOOD.', mood:'GOOD MOOD.', lead:'Bold chaap, smoky grills and comforting flavours. Choose your favourites — we will take care of the cravings.',
-    locationTag:'KHILKHET’S FLAVOUR CORNER', browses:'FROM OUR KITCHEN', explore:'Explore our', favourites:'favourites', sub:'Fresh flavours for every kind of appetite.',
-    all:'All dishes', chap:'Chaap', grill:'From the grill', special:'House specials', sides:'Sides', search:'Search your next craving...',
+    locationTag:'KHILKHET’S FLAVOUR CORNER', browses:'FROM OUR KITCHEN', explore:'Explore our', favourites:'favourites', sub:'Items transcribed from photographed menus. Please confirm current prices before ordering.',
+    all:'All items', chap:'Chicken chaap', beef:'Beef', grill:'Chicken & grill', naan:'Naan & roti', rice:'Rice', salad:'Salads', drinks:'Cold drinks', shakes:'Shakes', coffee:'Coffee', juice:'Juice', dessert:'Desserts', special:'House specials', sides:'Sides', search:'Search your next craving...',
     add:'Add to cart', unavailable:'Unavailable', closed:'Ordering paused', price:'Price on request', call:'Call us', directions:'Get directions',
     enjoy:'MADE FOR THE GOOD TIMES', tagline:'Come hungry. Leave happy.', intro:'Made for people who love getting together over great food.',
     bag:'Your bag', empty:'Your bag is feeling a little empty.', empty2:'Good food is only a few clicks away.', browse:'Browse dishes',
@@ -17,8 +17,8 @@ export const dictionary = {
   bn: {
     menu:'মেনু',story:'আমাদের কথা',location:'ঠিকানা',track:'অর্ডার ট্র্যাক',account:'আমার অ্যাকাউন্ট',cart:'কার্ট',open:'মেনু দেখুন',
     headline:'জমবে খাওয়া।',mood:'জমবে আড্ডা।',lead:'মজাদার চাপ, ধোঁয়া ওঠা গ্রিল আর প্রিয় খাবার। পছন্দের খাবার বেছে নিন।',
-    locationTag:'খিলক্ষেতের মজার খাবারের ঠিকানা',browses:'আমাদের রান্নাঘর থেকে',explore:'আমাদের',favourites:'পছন্দের খাবার',sub:'প্রতিটি ক্ষুধার জন্য মজার কিছু।',
-    all:'সব খাবার',chap:'চাপ',grill:'গ্রিল',special:'স্পেশাল',sides:'সাইডস',search:'খাবার খুঁজুন...',
+    locationTag:'খিলক্ষেতের মজার খাবারের ঠিকানা',browses:'আমাদের রান্নাঘর থেকে',explore:'আমাদের',favourites:'পছন্দের খাবার',sub:'মেনুর ছবি থেকে আইটেম যোগ করা হয়েছে। অর্ডারের আগে বর্তমান দাম নিশ্চিত করুন।',
+    all:'সব আইটেম',chap:'চিকেন চাপ',beef:'বিফ',grill:'চিকেন ও গ্রিল',naan:'নান ও রুটি',rice:'ভাত',salad:'সালাদ',drinks:'পানীয়',shakes:'শেক',coffee:'কফি',juice:'জুস',dessert:'ডেজার্ট',special:'স্পেশাল',sides:'সাইডস',search:'খাবার খুঁজুন...',
     add:'কার্টে যোগ করুন',unavailable:'পাওয়া যাচ্ছে না',closed:'অর্ডার বন্ধ',price:'দাম জানতে কল করুন',call:'কল করুন',directions:'গুগল ম্যাপে দেখুন',
     enjoy:'আড্ডা আর খাবারের গল্প',tagline:'ক্ষুধা নিয়ে আসুন, হাসিমুখে ফিরুন।',intro:'প্রিয় মানুষদের নিয়ে মজার খাবার আর সুন্দর সময় কাটান।',
     bag:'আপনার কার্ট',empty:'কার্টে এখনো কিছু নেই।',empty2:'মেনু থেকে আপনার পছন্দের খাবার বেছে নিন।',browse:'মেনু দেখুন',

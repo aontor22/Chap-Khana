@@ -5,7 +5,7 @@ import { money, validImage } from '../lib/utils';
 import type { MenuItem } from '../types';
 export function DishImage({item,large=false}:{item:MenuItem;large?:boolean}) {
   const [failed,setFailed]=useState(false);
-  return <div className={`dish-image ${large?'h-full':''}`}>{!failed&&validImage(item.image_url) ? <img src={item.image_url} alt={`Illustrative photo for ${item.name}`} loading="lazy" onError={()=>setFailed(true)}/> : <div className="dish-fallback"><span>CHAP KHANA</span><span className="text-5xl">♨</span><small>GOOD FOOD · GOOD MOOD</small></div>}</div>;
+  return <div className={`dish-image ${large?'h-full':''}`}>{!failed&&validImage(item.image_url) ? <img src={item.image_url} alt={`Illustrative photo for ${item.name}`} loading="lazy" onError={()=>setFailed(true)}/> : <div className={`dish-fallback dish-fallback-${item.category}`}><img src="/brand/chap-khana-logo.png" alt="" aria-hidden="true" className="dish-brand-watermark"/><span className="dish-fallback-title">{item.name_bn || item.name}</span><small>চাপ খানা • CHAP KHANA</small></div>}</div>;
 }
 export default function DishCard({item}:{item:MenuItem}) {
   const {locale,t,add,settings}=useShop();const canOrder=Boolean(item.price&&item.available&&settings.accepting_orders);

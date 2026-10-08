@@ -1,4 +1,5 @@
-export type Category = 'chap' | 'grill' | 'special' | 'sides';
+export const MENU_CATEGORIES = ['chap','beef','grill','naan','rice','salad','drinks','shakes','coffee','juice','dessert','special','sides'] as const;
+export type Category = typeof MENU_CATEGORIES[number];
 export type Fulfillment = 'pickup' | 'delivery';
 export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out_for_delivery' | 'completed' | 'cancelled';
 export type Locale = 'en' | 'bn';

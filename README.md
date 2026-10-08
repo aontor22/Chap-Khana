@@ -1,10 +1,10 @@
 # Chap Khana — React + TypeScript restaurant ordering platform
 
-**Version:** 2.0.0 · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
+**Version:** 3.0.0 (brand + catalog update) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
 
 This repository is a component-based rebuild of the prior vanilla-JS Chap Khana showcase/ordering prototype. Includes bilingual storefront, live-priced menu, local demo mode, cart, pickup/delivery checkout, idempotent PostgreSQL RPC, order tracking, Google login, account order history, staff dashboard, menu editor and settings.
 
-**Owner approval is required.** Photos, restaurant hours/contact, brand use and *all prices* are illustrative/unverified until the operator approves them. No payment gateway has been configured.
+**Owner approval is required.** Restaurant contact and every photographed menu price require owner confirmation before live orders. The new logo is a visual recreation of the photos, not an original vector logo. No payment gateway has been configured.
 
 ## Quick start
 
@@ -14,6 +14,7 @@ npm install
 cp .env.example .env.local # fill in public URL and publishable key for live mode
 npm run dev
 npm run build
+npm run test:catalog
 npm run test
 ```
 
@@ -33,6 +34,7 @@ supabase/
   01_fresh_schema.sql                 Run only on an EMPTY database
   02_existing_google_upgrade.sql     Run only for a pre-Google legacy database
   migrations/03_production_hardening.sql  Run for both fresh and upgraded DBs
+  migrations/04_brand_menu_catalog.sql  Run AFTER 03 to import 56 public dishes + 37 hidden drafts
 ```
 
 Key security boundaries:
@@ -120,3 +122,13 @@ Do not execute this SQL from the browser or create public role-assignment APIs.
 - React production build and Vitest require npm packages; no compiled `dist` is committed to this source ZIP.
 
 **Documentation:** [React](https://react.dev/learn) · [Vite](https://vite.dev/guide/) · [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security) · [Google OAuth](https://supabase.com/docs/guides/auth/social-login/auth-google) · [Vercel Vite](https://vercel.com/docs/frameworks/frontend/vite) · [Unsplash license](https://unsplash.com/license).
+
+## Brand and photographed menu catalog (v3.0)
+
+- Uses `public/brand/chap-khana-logo.png` across header, footer, admin and branded dish placeholders; `public/favicon.png` is an emblem crop. This logo is a **generated recreation**, so get the official source asset from the owner for an exact brand match.
+- `src/data/menu-catalog.json` includes **93 records: 56 public, 37 admin-only drafts** from potentially older/other-branch printed menus. Nine public prices are unknown and intentionally not orderable. The public prices are transcribed from photos, **not verified**.
+- Run `supabase/migrations/04_brand_menu_catalog.sql` after the prior production hardening migration. It leaves existing priced menu rows and customer orders alone. Existing manually edited prices can differ from source and should be rechecked in the admin UI.
+- More detail: `docs/MENU-AND-BRAND-REVIEW.md` and `docs/TEST-RESULTS.md`.
+- Run `npm run test:catalog` to test the JSON data and SQL seed without installing third-party dependencies. The standard `npm test` still runs the existing Vitest suite after installing npm dependencies.
+
+Official references: [React](https://react.dev/learn), [Vite](https://vite.dev/guide/), [Supabase Auth](https://supabase.com/docs/guides/auth), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).

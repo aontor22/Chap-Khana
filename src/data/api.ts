@@ -6,7 +6,7 @@ import type { Cart, CheckoutInfo, MenuItem, Order, OrderReceipt, OrderStatus, St
 const db = () => { if (!supabase) throw new Error('Supabase is not configured.'); return supabase; };
 const fail = (error: { message: string } | null) => { if (error) throw new Error(error.message); };
 export const getMenu = async (): Promise<MenuItem[]> => {
-  if (!supabase) return fromStorage('ckr_demo_menu',demoMenu);
+  if (!supabase) return fromStorage('ckr_demo_menu_v3',demoMenu);
   const {data,error}=await db().from('menu_items').select('*').order('sort_order'); fail(error);
   return (data || []) as MenuItem[];
 };
@@ -22,6 +22,8 @@ export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[],
     fail(error); if (!data || typeof data !== 'object' || !('tracking_token' in data)) throw new Error('Order acknowledgement was not received. Contact the restaurant before trying again.');
     return data as unknown as OrderReceipt;
   }
+  if(!items.length)throw new Error('Choose at least one available item.');
+  for(const line of items){const item=menu.find(x=>x.id===line.id);if(!item?.active||!item.available||!Number.isInteger(item.price)||!item.price||item.price<1)throw new Error('Cart contains a dish with an unconfirmed price. Refresh and try again.');}
   const stamp=new Date().toISOString();const code='DEMO-'+crypto.randomUUID().slice(0,8).toUpperCase();const token=crypto.randomUUID();
   const orderItems=items.map(line=>{const item=menu.find(m=>m.id===line.id)!;return {menu_item_id:item.id,item_name:item.name,unit_price:item.price!,qty:line.qty,line_total:item.price!*line.qty};});
   const subtotal=orderItems.reduce((s,i)=>s+i.line_total,0); const fee=info.type==='delivery'?settings.delivery_fee:0;
@@ -56,7 +58,7 @@ export const changeOrderStatus=async (id:string,status:OrderStatus):Promise<void
   const {data,error}=await db().from('orders').update({status}).eq('id',id).select('id').single();fail(error);if (!data) throw new Error('Order update was not confirmed.');
 };
 export const saveMenuItem=async (item:MenuItem):Promise<void>=>{
-  if (!supabase) {const menu=fromStorage('ckr_demo_menu',demoMenu);saveStorage('ckr_demo_menu',[...menu.filter(x=>x.id!==item.id),item].sort((a,b)=>a.sort_order-b.sort_order));return;}
+  if (!supabase) {const menu=fromStorage('ckr_demo_menu_v3',demoMenu);saveStorage('ckr_demo_menu_v3',[...menu.filter(x=>x.id!==item.id),item].sort((a,b)=>a.sort_order-b.sort_order));return;}
   const {error}=await db().from('menu_items').upsert(item,{onConflict:'id'});fail(error);
 };
 export const saveStoreSettings=async (settings:StoreSettings):Promise<void>=>{

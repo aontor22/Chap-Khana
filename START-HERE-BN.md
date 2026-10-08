@@ -61,3 +61,13 @@ Render → New → Static Site → Build `npm install && npm run build` → Publ
 - Real Google OAuth / Supabase permission / payment test করার জন্য তোমার নিজস্ব project configure করতে হবে।
 
 Full feature matrix ও developer notes: `README.md`।
+
+
+## ২০২৬ মেনু + লোগো আপডেট (v3.0)
+
+- ওয়েবসাইটের Header, Footer, Admin panel, খাবারের card ও favicon-এ মেনুর ছবি থেকে নতুন করে তৈরি **চাপ খানা** logo যুক্ত। অফিসিয়াল logo file পেলে সেটি দিয়ে পরিবর্তন করো; বর্তমান PNG হুবহু মূল vector নয়।
+- ৫৬টি food/coffee item public catalog-এ, পুরোনো/অন্য শাখার ছবির ৩৭টি item admin-only hidden draft। ৯টি item-এর দাম অস্পষ্ট/এমআরপি হওয়ায় price ফাঁকা রাখা হয়েছে।
+- **নতুন ও পুরোনো Supabase দুটো ক্ষেত্রেই**, previous 03 migration সফলভাবে run করার পরে SQL Editor-এ `supabase/migrations/04_brand_menu_catalog.sql` run করো। আগের orders ও verified menu prices মুছে যাবে না।
+- Kitchen staff/owner-এর সাথে একে একে price, branch এবং availability যাচাই করে তারপরেই online ordering চালু করবে। ডেমো cart-এর order বাস্তব রেস্টুরেন্টে পাঠায় না।
+- Build/test commands: `npm install`, `npm run test:catalog`, `npm test`, `npm run build`।
+- বিস্তারিত: `docs/MENU-AND-BRAND-REVIEW.md` ও `docs/TEST-RESULTS.md`।
