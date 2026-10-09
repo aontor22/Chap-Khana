@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { isConfigured } from '../lib/config';
 import { fromStorage, saveStorage } from '../lib/utils';
+import { discountedUnitPrice } from '../lib/discount';
 import { getMenu, getSettings } from '../data/api';
 import type { Cart, Locale, MenuItem, StoreSettings } from '../types';
 import { demoSettings } from '../data/demo';
@@ -68,7 +69,7 @@ export function ShopProvider({children}:{children:ReactNode}) {
   const remove=(id:string)=>setCart(prev=>{const next={...prev};delete next[id];return next;});
   const clearCart=()=>setCart({});
   const count=Object.values(cart).reduce((s,n)=>s+(Number.isInteger(n)&&n>0?n:0),0);
-  const subtotal=menu.reduce((s,m)=>s+(m.price||0)*(cart[m.id]||0),0);
+  const subtotal=menu.reduce((s,m)=>s+(discountedUnitPrice(m)||0)*(cart[m.id]||0),0);
   const value=useMemo<ShopState>(()=>({live:isConfigured,locale,setLocale,t:getText(locale),user,authLoading,signInGoogle,signInPassword,signOut,menu,settings,loading,error,refresh,cart,count,subtotal,add,decrease,remove,clearCart,alert,notify}),
     // These handlers depend on current cart/menu/auth; memoization is for one consistent context snapshot.
     // eslint-disable-next-line react-hooks/exhaustive-deps

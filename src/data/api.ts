@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { fromStorage, saveStorage } from '../lib/utils';
+import { discountedUnitPrice } from '../lib/discount';
 import { demoMenu, demoSettings } from './demo';
 import type { Cart, CheckoutInfo, MenuItem, Order, OrderReceipt, OrderStatus, StoreSettings, TrackingResult } from '../types';
 
@@ -25,7 +26,7 @@ export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[],
   if(!items.length)throw new Error('Choose at least one available item.');
   for(const line of items){const item=menu.find(x=>x.id===line.id);if(!item?.active||!item.available||!Number.isInteger(item.price)||!item.price||item.price<1)throw new Error('Cart contains a dish with an unconfirmed price. Refresh and try again.');}
   const stamp=new Date().toISOString();const code='DEMO-'+crypto.randomUUID().slice(0,8).toUpperCase();const token=crypto.randomUUID();
-  const orderItems=items.map(line=>{const item=menu.find(m=>m.id===line.id)!;return {menu_item_id:item.id,item_name:item.name,unit_price:item.price!,qty:line.qty,line_total:item.price!*line.qty};});
+  const orderItems=items.map(line=>{const item=menu.find(m=>m.id===line.id)!;const final=discountedUnitPrice(item)!;return {menu_item_id:item.id,item_name:item.name,unit_price:final,original_unit_price:item.price!,discount_unit_amount:item.price!-final,qty:line.qty,line_total:final*line.qty};});
   const subtotal=orderItems.reduce((s,i)=>s+i.line_total,0); const fee=info.type==='delivery'?settings.delivery_fee:0;
   const order: Order={id:crypto.randomUUID(),code,tracking_token:token,customer_name:info.name,customer_phone:info.phone,delivery_address:info.address,notes:info.notes,fulfillment_type:info.type,status:'pending',subtotal,delivery_fee:fee,total:subtotal+fee,created_at:stamp,order_items:orderItems};
   saveStorage('ckr_demo_orders',[order,...fromStorage<Order[]>('ckr_demo_orders',[])]);

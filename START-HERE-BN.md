@@ -81,3 +81,7 @@ Full feature matrix ও developer notes: `README.md`।
 - তারপর GitHub-এ নতুন source push করে Vercel deploy দাও। Backend-এ আগের ফাঁকা image_url থাকলেও frontend catalog fallback ছবি দেখাবে।
 - `docs/FOOD-IMAGE-SOURCES.csv`-এ প্রতিটি item-এর Unsplash photo source ও reference description আছে।
 - Testing: `npm run test:catalog && npm test && npm run build`। CDN/photo loading প্রকৃত browser-এ আলাদা করে verify করবে।
+
+
+## v3.3 Item-wise Discount (NEW)
+আগের 01/03/04/05 SQL run করা থাকলে database না মুছে **`supabase/migrations/06_item_discounts.sql`** run করুন। তারপর GitHub push ও Vercel redeploy দিন। `/admin` → Menu → Edit-এ নতুন **Item discount** control আছে। `docs/ITEM-DISCOUNTS-BN.md`-তে সম্পূর্ণ ব্যবহারবিধি রয়েছে।

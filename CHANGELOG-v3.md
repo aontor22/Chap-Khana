@@ -31,3 +31,17 @@
 - Load secondary routes lazily to reduce initial JavaScript size and preserve functional checkout/admin components.
 - No database migrations, menu data, photos, or credentials changed.
 - Dependency vulnerabilities still require review using `npm audit` from the installed project.
+
+
+## v3.2.2 — Test-tooling security remediation
+- Updated Vitest from 3.x to 4.1.11+ to address the patched mocker advisory.
+- Enforced Tinypool >=2.1.2, which contains the prototype-pollution fixes.
+- Added `npm run audit:production` to distinguish deployment dependency vulnerabilities from build/test-tool alerts.
+- Kept Tailwind CSS at 3.x intentionally: migration to v4 is breaking and must receive visual regression testing. The upstream `braces` advisory currently lists no patched version, so development dependency alerts may remain.
+- No changes to Supabase, Google OAuth, restaurant menu data, payments, UI, or database.
+
+
+## v3.3.0 — per-menu-item discounts
+- Admin can set percentage or fixed-amount discounts per menu item, turn them off, and preview final price.
+- Customer menu, cart, checkout and local demo totals show discounted price and savings.
+- Supabase migration 06 updates server-validated checkout and stores per-item original/discounted price snapshots. Existing orders are preserved.

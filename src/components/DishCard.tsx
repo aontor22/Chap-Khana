@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { money, validImage } from '../lib/utils';
+import { discountedUnitPrice, discountLabel, unitSavings } from '../lib/discount';
 import type { MenuItem } from '../types';
 // The menu catalog provides illustrative reference photos when a Supabase row or an
 // old browser-local demo menu has an empty image_url. Owner-uploaded photos always win.
@@ -29,8 +30,8 @@ export function DishImage({item,large=false}:{item:MenuItem;large?:boolean}) {
   </div>;
 }
 export default function DishCard({item}:{item:MenuItem}) {
-  const {locale,t,add,settings}=useShop();const canOrder=Boolean(item.price&&item.available&&settings.accepting_orders);
-  return <article className="dish-card group"><div className="relative overflow-hidden"><DishImage item={item}/>{item.badge&&<span className="dish-badge">✳ {item.badge}</span>}<div className="absolute bottom-4 right-4 transition-transform group-hover:translate-x-1"><ArrowUpRight size={24} className="text-white drop-shadow-lg"/></div></div>
-    <div className="px-5 py-5"><div className="eyebrow mb-2">{t[item.category]}</div><h3 className="font-bold text-xl tracking-tight text-ink">{locale==='bn'?(item.name_bn||item.name):item.name}</h3><p className="text-sm text-[#80746e] mt-2 min-h-[42px] leading-relaxed">{locale==='bn'?(item.description_bn||item.description):item.description}</p><div className="flex items-center justify-between gap-2 pt-5 mt-4 border-t border-[#f0e6dc]"><span className="font-extrabold text-xl">{item.price!==null?money(item.price):t.price}</span><button type="button" className="add-btn" onClick={()=>add(item.id)} disabled={!canOrder} aria-label={`${t.add}: ${item.name}`}><Plus size={17}/><span>{canOrder?t.add:item.price===null?t.price:!item.available?t.unavailable:t.closed}</span></button></div></div>
+  const {locale,t,add,settings}=useShop();const finalPrice=discountedUnitPrice(item);const offer=discountLabel(item);const canOrder=Boolean(item.price&&item.available&&settings.accepting_orders);
+  return <article className="dish-card group"><div className="relative overflow-hidden"><DishImage item={item}/>{item.badge&&<span className="dish-badge">✳ {item.badge}</span>}{offer&&<span className="discount-ribbon">{offer}</span>}<div className="absolute bottom-4 right-4 transition-transform group-hover:translate-x-1"><ArrowUpRight size={24} className="text-white drop-shadow-lg"/></div></div>
+    <div className="px-5 py-5"><div className="eyebrow mb-2">{t[item.category]}</div><h3 className="font-bold text-xl tracking-tight text-ink">{locale==='bn'?(item.name_bn||item.name):item.name}</h3><p className="text-sm text-[#80746e] mt-2 min-h-[42px] leading-relaxed">{locale==='bn'?(item.description_bn||item.description):item.description}</p><div className="flex items-center justify-between gap-2 pt-5 mt-4 border-t border-[#f0e6dc]"><div className="flex flex-col gap-0.5"><span className="font-extrabold text-xl text-ember">{finalPrice!==null?money(finalPrice):t.price}</span>{unitSavings(item)>0&&<span className="text-xs text-[#847569]"><s>{money(item.price!)}</s> <span className="text-green-700 font-semibold">Save {money(unitSavings(item))}</span></span>}</div><button type="button" className="add-btn" onClick={()=>add(item.id)} disabled={!canOrder} aria-label={`${t.add}: ${item.name}`}><Plus size={17}/><span>{canOrder?t.add:item.price===null?t.price:!item.available?t.unavailable:t.closed}</span></button></div></div>
   </article>;
 }

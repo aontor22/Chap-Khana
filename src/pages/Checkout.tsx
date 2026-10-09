@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BadgeCheck, ClipboardCopy, CreditCard, MapPin, S
 import { useShop } from '../context/ShopContext';
 import { placeOrder } from '../data/api';
 import { money, validateCheckout, waitError } from '../lib/utils';
+import { discountedUnitPrice, unitSavings } from '../lib/discount';
 import type { CheckoutInfo, OrderReceipt } from '../types';
 
 export default function Checkout(){
@@ -12,7 +13,7 @@ export default function Checkout(){
   const requestId=useRef(crypto.randomUUID());
   const [busy,setBusy]=useState(false);const [issue,setIssue]=useState('');const [result,setResult]=useState<OrderReceipt|null>(null);
   if(!count&&!result) return <Navigate to="/cart" replace/>;
-  const deliveryFee=info.type==='delivery'?settings.delivery_fee:0;
+  const deliveryFee=info.type==='delivery'?settings.delivery_fee:0;const savings=menu.reduce((sum,item)=>sum+unitSavings(item)*(cart[item.id]||0),0);
   const update=(key:keyof CheckoutInfo,val:string)=>setInfo(prev=>({...prev,[key]:val}));
   const onSubmit=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();if(busy)return;
@@ -36,7 +37,7 @@ export default function Checkout(){
         <button disabled={busy||!settings.accepting_orders} type="submit" className="btn-primary w-full justify-center mt-7">{busy?t.placing:live?t.place:t.demoPlace}<ArrowRight size={17}/></button>
         <p className="text-xs text-[#9c8b81] mt-4">{live?'Submitting creates a real order in the configured Supabase project.':'This is a local demo order only. No restaurant receives it.'}</p>
       </div>
-      <aside className="summary-card"><h2 className="text-xl font-bold mb-6">{t.review}</h2>{menu.filter(m=>cart[m.id]).map(m=><div className="summary-line" key={m.id}><span>{m.name} <small>× {cart[m.id]}</small></span><strong>{money((m.price||0)*(cart[m.id]||0))}</strong></div>)}<div className="summary-line pt-6 border-t border-[#e9dfd5] mt-4"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><div className="summary-line"><span>{t.fee}</span><strong>{money(deliveryFee)}</strong></div><div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee)}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices and delivery fees are recomputed and verified in Postgres at submission.</p></aside>
+      <aside className="summary-card"><h2 className="text-xl font-bold mb-6">{t.review}</h2>{menu.filter(m=>cart[m.id]).map(m=><div className="summary-line" key={m.id}><span>{m.name} <small>× {cart[m.id]}</small></span><strong>{money((discountedUnitPrice(m)||0)*(cart[m.id]||0))}</strong></div>)}{savings>0&&<div className="summary-line text-green-700"><span>Discount savings</span><strong>−{money(savings)}</strong></div>}<div className="summary-line pt-6 border-t border-[#e9dfd5] mt-4"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><div className="summary-line"><span>{t.fee}</span><strong>{money(deliveryFee)}</strong></div><div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee)}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices and delivery fees are recomputed and verified in Postgres at submission.</p></aside>
     </form>
   </section>;
 }

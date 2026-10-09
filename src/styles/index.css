@@ -138,3 +138,6 @@
   .modal-dialog{@apply bg-white w-full max-w-[710px] p-6 sm:p-9 max-h-[90vh] overflow-auto shadow-2xl;}
 }
 @media(max-width:430px){.hero-heading{font-size:clamp(2.65rem,12vw,3.65rem)}.hero{min-height:490px}.top-ribbon{letter-spacing:.05em}.cart-item{gap:12px}.add-btn span{font-size:10px}.site-wrap{padding-left:18px;padding-right:18px}}
+
+/* Per-item offers on food cards (v3.3) */
+.discount-ribbon { position: absolute; top: 14px; right: 14px; z-index: 2; border-radius: 10px; padding: 7px 11px; font-size: 12px; font-weight: 850; letter-spacing: .03em; background: #137a42; color: white; box-shadow: 0 4px 15px #0003; }

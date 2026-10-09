@@ -142,3 +142,7 @@ Official references: [React](https://react.dev/learn), [Vite](https://vite.dev/g
 All **93 catalog entries** (56 visible + 37 admin drafts) have illustrative Unsplash reference photo URLs with per-item photo source-page links in `docs/FOOD-IMAGE-SOURCES.csv`. Variants sometimes reuse visually appropriate reference photos. These images **are not photos of Chap Khana's actual dishes**. The React component gives priority to an owner's `menu_items.image_url` and falls back to the catalog image only if it is empty; failed remote images display category-specific food icon/gradient instead of the repeated brand logo.
 
 **Apply images to the real Supabase DB:** After `04_brand_menu_catalog.sql`, paste and run `supabase/migrations/05_reference_food_images.sql` in SQL Editor. Re-running is safe; custom images, pricing, availability and orders are untouched. You still must deploy the React source to Vercel. The photos link to a third-party CDN; test actual loading on mobile and desktop, replace with original restaurant photography when available, and observe the photographer source links and [Unsplash License](https://unsplash.com/license).
+
+
+### Per-item discounts (v3.3)
+Run `supabase/migrations/06_item_discounts.sql` **after** the earlier fresh schema/hardening/catalog scripts and before deploying this frontend. Then Admin > Menu > Edit > Item discount to set % or ৳ off. See `docs/ITEM-DISCOUNTS-BN.md`. Discounts are computed in the database, not trusted from the browser.
