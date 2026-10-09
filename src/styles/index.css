@@ -64,9 +64,11 @@
   .dish-fallback-coffee,.dish-fallback-shakes{background:radial-gradient(circle at 80% 15%,rgba(255,199,91,.35),transparent 36%),linear-gradient(135deg,#6c462c,#261810);}
   .dish-fallback-naan,.dish-fallback-salad{background:radial-gradient(circle at 80% 15%,rgba(236,204,121,.3),transparent 36%),linear-gradient(135deg,#82734b,#30271b);}
   .dish-fallback-drinks{background:radial-gradient(circle at 80% 15%,rgba(255,197,117,.30),transparent 38%),linear-gradient(135deg,#a45b26,#3c2918);}
-  .dish-brand-watermark{@apply w-[180px] max-h-[77px] object-contain drop-shadow-lg;}
+  .dish-fallback-symbol{@apply text-[68px] leading-none drop-shadow-lg;}
   .dish-fallback-title{@apply max-w-[250px] text-[20px] font-bold tracking-normal leading-relaxed drop-shadow-md;}
   .dish-fallback small{@apply text-[10px] tracking-[.12em] text-[#ffe2be];}
+  .dish-image-reference{@apply absolute bottom-3 left-3 bg-[#160e0ac9] text-[#fff3e6] px-2 py-1 text-[9px] font-bold tracking-wider rounded-sm;}
+  .dish-image img{@apply block;}
   .dish-badge{@apply absolute top-4 left-4 bg-[#fff7ef] text-[#b34b2c] text-[10px] font-bold px-3 py-2;}
   .eyebrow{@apply text-[10px] font-extrabold tracking-[.16em] text-ember uppercase;}
   .add-btn{@apply bg-[#bb4624] text-white text-[11px] sm:text-xs font-bold px-3 py-2.5 inline-flex items-center gap-1.5 hover:bg-[#9d361d] transition-colors;}

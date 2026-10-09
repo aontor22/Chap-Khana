@@ -71,3 +71,13 @@ Full feature matrix ও developer notes: `README.md`।
 - Kitchen staff/owner-এর সাথে একে একে price, branch এবং availability যাচাই করে তারপরেই online ordering চালু করবে। ডেমো cart-এর order বাস্তব রেস্টুরেন্টে পাঠায় না।
 - Build/test commands: `npm install`, `npm run test:catalog`, `npm test`, `npm run build`।
 - বিস্তারিত: `docs/MENU-AND-BRAND-REVIEW.md` ও `docs/TEST-RESULTS.md`।
+
+
+## ২০২৬ অনলাইন Reference Food Images (v3.2)
+
+- Menu-র **সব ৯৩টি** item-এর জন্য অনলাইন Unsplash ছবির URL যুক্ত (৫৬টি visible, ৩৭টি draft)। ছবিগুলো **reference**; Chap Khana restaurant-এর আসল food photo নয়।
+- আগের `01`, `03`, `04` SQL run করা থাকলে এবার **শুধু** `supabase/migrations/05_reference_food_images.sql` Supabase SQL Editor-এ run করো। `01` থেকে আবার run করবে না।
+- `05` migration শুধু যে `image_url` ফাঁকা সেই জায়গায় ছবি যোগ করে; admin-uploaded image, price এবং availability বদলায় না।
+- তারপর GitHub-এ নতুন source push করে Vercel deploy দাও। Backend-এ আগের ফাঁকা image_url থাকলেও frontend catalog fallback ছবি দেখাবে।
+- `docs/FOOD-IMAGE-SOURCES.csv`-এ প্রতিটি item-এর Unsplash photo source ও reference description আছে।
+- Testing: `npm run test:catalog && npm test && npm run build`। CDN/photo loading প্রকৃত browser-এ আলাদা করে verify করবে।

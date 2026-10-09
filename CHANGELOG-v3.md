@@ -16,3 +16,18 @@
 - Replaced the website brand asset with a transparent PNG wordmark based on the provided printed menu logo.
 - Rebuilt transparent favicon and square brand icons from the same logo family.
 - No menu or database rows were changed in this patch.
+
+
+## v3.2.0 — Illustrated online menu
+- Added curated third-party Unsplash reference photo links to all 93 catalog entries (56 customer-visible, 37 admin drafts).
+- Added a safely repeatable Supabase **05_reference_food_images.sql** migration. Only fills empty image_url fields, protecting owner photos, prices, order state and restaurant settings.
+- Added a browser-local reference-image resolver so preexisting demo menus or Supabase records without URLs still show food imagery.
+- Added category-specific emoji/gradient fallback on remote image errors, instead of repeating the restaurant brand logo across all product cards.
+- Added a clear illustrative-photo disclosure and a source-credit CSV in docs/.
+
+
+## v3.2.1 — Test discovery and page chunking
+- Restrict Vitest discovery to `.test.ts` and `.test.tsx` suites. Run the Node.js catalog suite separately via `npm run test:catalog`.
+- Load secondary routes lazily to reduce initial JavaScript size and preserve functional checkout/admin components.
+- No database migrations, menu data, photos, or credentials changed.
+- Dependency vulnerabilities still require review using `npm audit` from the installed project.

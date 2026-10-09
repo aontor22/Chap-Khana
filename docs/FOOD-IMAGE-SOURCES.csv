@@ -1,0 +1,94 @@
+id,menu_name,image_url,unsplash_photo_page,photo_description,published_in_menu
+chicken-chap,Chicken Chap,https://images.unsplash.com/photo-1775211578178-61f06027adf3?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/TpEWAKRwsOg,Tandoori chicken with naan and dip,True
+chicken-barbecue,Chicken Barbecue,https://images.unsplash.com/photo-1567121938596-6d9d015d348b?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/46i7Fqy4bto,Grilled chicken dish,True
+tandoori-chicken,Chicken Tandoori,https://images.unsplash.com/photo-1727280376746-b89107a5b0df?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/R25pvpErlsI,Tandoori-style chicken wings,True
+chicken-boti-kebab,Chicken Boti Kebab,https://images.unsplash.com/photo-1755090154782-5215189b4083?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/A7G7eTQb5Dc,Chicken tikka skewers,True
+chicken-wings-bbq,Chicken Wings BBQ,https://images.unsplash.com/photo-1778449550981-b667cd218838?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/Z14H5PqOTG0,Wings grilling,True
+chicken-malai-tandoori,Chicken Malai Tandoori,https://images.unsplash.com/photo-1781332148236-223ee9c7bff1?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/qwFzfojNYpA,Grilled chicken and flatbread plate,True
+chicken-reshmi-kebab,Chicken Reshmi Kebab,https://images.unsplash.com/photo-1727281970324-4bda7bab3073?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/wklODYfFvmg,Chicken BBQ skewers on plate,True
+chicken-hariyali-kebab,Chicken Hariyali Kebab,https://images.unsplash.com/photo-1779086646395-00668466d0d0?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_CtheRoTetY,Chicken skewers cooking over grill,True
+chicken-afghani-kebab,Chicken Afghani Kebab,https://images.unsplash.com/photo-1755090154782-5215189b4083?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/A7G7eTQb5Dc,Chicken skewers,True
+chicken-grill-half,Chicken Grill (Half),https://images.unsplash.com/photo-1567121938596-6d9d015d348b?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/46i7Fqy4bto,Grilled chicken dish,True
+chicken-grill-full,Chicken Grill (Full),https://images.unsplash.com/photo-1781332148236-223ee9c7bff1?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/qwFzfojNYpA,Grilled chicken and flatbread plate,True
+charcoal-grill-half,Charcoal Grill (Half),https://images.unsplash.com/photo-1779086646395-00668466d0d0?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_CtheRoTetY,Chicken skewers cooking over grill,True
+charcoal-grill-full,Charcoal Grill (Full),https://images.unsplash.com/photo-1778449550981-b667cd218838?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/Z14H5PqOTG0,Wings grilling,True
+chicken-naga-boti-chap,Chicken Naga Boti Chap,https://images.unsplash.com/photo-1755090154782-5215189b4083?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/A7G7eTQb5Dc,Chicken tikka skewers,True
+beef-chap,Beef Chap,https://images.unsplash.com/photo-1625604086816-4bfaf603e842?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/JJ7Je0Kz8MI,Cooked beef on dark pan,True
+beef-boti-kebab,Beef Boti Kebab,https://images.unsplash.com/photo-1773903369045-242a4dc87b3b?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/ar84rPk3YWU,Beef cubes on grill,True
+beef-afghani-kebab,Beef Afghani Kebab,https://images.unsplash.com/photo-1773903447504-7408156f5502?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/xIVargormXU,Grilling beef and vegetables,True
+beef-kala-bhuna,Beef Kala Bhuna,https://images.unsplash.com/photo-1740993382497-65dba6c7a689?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/E7UyDYG2a_U,Beef stew in bowl,True
+beef-nehari,Beef Nehari,https://images.unsplash.com/photo-1519699788450-ad34386a3bfc?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/a-gPTenlS0U,Slow-cooked beef stew,True
+fried-rice,Fried Rice,https://images.unsplash.com/photo-1772729440931-e8efd3adc748?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/gpkRa3elzrI,Chicken and vegetable fried rice,True
+duck-bhuna,Duck Bhuna,https://images.unsplash.com/photo-1597511120363-9ce47aae7941?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/OzO74SnD8R4,Cooked duck served in bowl,True
+naan,Plain Naan,https://images.unsplash.com/photo-1690915475901-6c08af925906?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/q3xIfK0COFI,Fresh naan bread at a restaurant,True
+butter-naan,Butter Naan,https://images.unsplash.com/photo-1655979284091-eea0e93405ee?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/WrE3ruckrwI,Flatbread / naan on plate,True
+butter-garlic-naan,Butter Garlic Naan,https://images.unsplash.com/photo-1690915475901-6c08af925906?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/q3xIfK0COFI,Fresh naan bread at a restaurant,True
+chilli-butter-garlic-naan,Chilli Butter Garlic Naan,https://images.unsplash.com/photo-1725483990094-e95226a16db7?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/s2-IT1_deyo,Garlic naan preparation,True
+special-naan,Special Naan,https://images.unsplash.com/photo-1655979284091-eea0e93405ee?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/WrE3ruckrwI,Flatbread / naan on plate,True
+biscuit-naan,Biscuit Naan,https://images.unsplash.com/photo-1690915475901-6c08af925906?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/q3xIfK0COFI,Fresh naan bread at a restaurant,True
+roti,Roti,https://images.unsplash.com/photo-1780907084874-14d202d39bf1?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/0_IyZ76n3H0,Roti flatbread on griddle,True
+raita-salad,Raita Salad,https://images.unsplash.com/photo-1773902280003-a769eb447460?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_ZuqlqSS1II,Fresh cucumber tomato carrot salad,True
+mixed-salad,Mixed Salad,https://images.unsplash.com/photo-1773902280003-a769eb447460?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_ZuqlqSS1II,Fresh cucumber tomato carrot salad,True
+fresh-fruit-drink-small,Fresh Fruit Drink (small),https://images.unsplash.com/photo-1716441392930-b4daa288266a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uBpCKXiKoF0,Mango juice in glass,True
+fresh-fruit-drink-large,Fresh Fruit Drink (large),https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/kkrXVKK-jhg,Fresh orange juice,True
+strawberry-lassi,Strawberry Lassi,https://images.unsplash.com/photo-1560536914-61692ef17082?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/ZrNWfz16Z4w,Strawberry smoothie,True
+salt-lassi,Salt Lassi,https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,True
+sweet-lassi,Sweet Lassi,https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,True
+special-coffee,Special Coffee,https://images.unsplash.com/photo-1564327367919-cb377ea6a88f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/UMUCQcDdLws,Cappuccino,True
+lemon-water,Lemon Water,https://images.unsplash.com/photo-1656589509114-43e7c178baef?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/KZ0AkzzXD_Y,Glass of lemon and lime water,True
+soft-drinks-mrp,Soft Drinks (MRP),https://images.unsplash.com/photo-1773188243488-702914547143?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uurg0rkdNjE,Cola over ice in glass,True
+mineral-water-mrp,Mineral Water (MRP),https://images.unsplash.com/photo-1616118271138-b14e3a69a3ca?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/SHZAxCcyfM8,Bottled water on table,True
+oreo-shake,Oreo Shake,https://images.unsplash.com/photo-1684151093347-2304cda70839?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/-WkMgh9g3Sg,Chocolate milkshake with cookie,True
+chocolate-milk-shake,Chocolate Milk Shake,https://images.unsplash.com/photo-1649067842726-a5c973a3a62c?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/Sxrr9waMENw,Chocolate milkshake,True
+espresso,Espresso,https://images.unsplash.com/photo-1741113937337-1d0273bf941d?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/wcGUNOXfrS0,Espresso poured into cup,True
+double-espresso,Double Espresso,https://images.unsplash.com/photo-1768319303689-610f2cd83a3a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/D556jNpHQ70,Coffee drinks at café counter,True
+americano,Americano,https://images.unsplash.com/photo-1581812182087-3b2aad1b9d9f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/QPSvll9tIUA,Cappuccino on saucer,True
+cappuccino,Cappuccino,https://images.unsplash.com/photo-1564327367919-cb377ea6a88f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/UMUCQcDdLws,Cappuccino,True
+caf-latte,Café Latte,https://images.unsplash.com/photo-1497636577773-f1231844b336?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/tA90pRfL2gM,Latte with art,True
+flat-white,Flat White,https://images.unsplash.com/photo-1628566474311-5196c23feafc?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/1c73AnqGClw,Coffee with milk in ceramic cup,True
+mocha,Mocha,https://images.unsplash.com/photo-1570355438251-805829cd9d64?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/NdTMG8dROVs,Coffee cup on table,True
+caramel-latte,Caramel Latte,https://images.unsplash.com/photo-1497636577773-f1231844b336?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/tA90pRfL2gM,Latte with art,True
+vanilla-latte,Vanilla Latte,https://images.unsplash.com/photo-1581812182087-3b2aad1b9d9f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/QPSvll9tIUA,Cappuccino on saucer,True
+iced-americano,Iced Americano,https://images.unsplash.com/photo-1765690835487-8da60d318d0f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/MxVNVFI_q2A,Iced black coffee,True
+iced-latte,Iced Latte,https://images.unsplash.com/photo-1777878176922-130222ceb11f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_gDPQLeHC-A,Iced latte with milk and ice,True
+iced-caramel-latte,Iced Caramel Latte,https://images.unsplash.com/photo-1783749924211-a348962aa06f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/lJTQF-AjJO0,Iced coffee in glass,True
+iced-mocha,Iced Mocha,https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/HP4VFH70LMc,Cold brew with milk,True
+cold-coffee-classic,Cold Coffee Classic,https://images.unsplash.com/photo-1783749924211-a348962aa06f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/lJTQF-AjJO0,Iced coffee in glass,True
+cold-coffee-with-ice-cream,Cold Coffee with Ice Cream,https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/HP4VFH70LMc,Cold brew with milk,True
+basmati-kacchi,Basmati Kacchi,https://images.unsplash.com/photo-1559528896-c5310744cce8?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/OterGMpkdsM,Bowl of rice / chicken biryani,False
+beef-tehari,Beef Tehari,https://images.unsplash.com/photo-1559528896-c5310744cce8?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/OterGMpkdsM,Bowl of rice / chicken biryani,False
+beef-achari-khichuri,Beef Achari Khichuri,https://images.unsplash.com/photo-1772729440931-e8efd3adc748?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/gpkRa3elzrI,Chicken and vegetable fried rice,False
+koyel-roast-and-polao,Koyel Roast and Polao,https://images.unsplash.com/photo-1687020835890-b0b8c6a04613?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/ScKpFBkq7U8,Chicken fried rice dish,False
+chicken-biryani,Chicken Biryani,https://images.unsplash.com/photo-1559528896-c5310744cce8?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/OterGMpkdsM,Bowl of rice / chicken biryani,False
+basmati-rice-deshi,Basmati Rice (Deshi),https://images.unsplash.com/photo-1772729440931-e8efd3adc748?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/gpkRa3elzrI,Chicken and vegetable fried rice,False
+beef-tikka,Beef Tikka,https://images.unsplash.com/photo-1773903447504-7408156f5502?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/xIVargormXU,Grilling beef and vegetables,False
+chicken-tikka,Chicken Tikka,https://images.unsplash.com/photo-1755090154782-5215189b4083?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/A7G7eTQb5Dc,Chicken tikka skewers,False
+chicken-jhal-fry,Chicken Jhal Fry,https://images.unsplash.com/photo-1727281970324-4bda7bab3073?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/wklODYfFvmg,Chicken BBQ skewers on plate,False
+shorisha-ilish,Shorisha Ilish,https://images.unsplash.com/photo-1620894580123-466ad3a0ca06?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/LPnJ146r9Mg,Kerala fish curry,False
+rui-fish,Rui Fish,https://images.unsplash.com/photo-1761314036779-84078bec535c?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/7v9U94719TE,Fish curry served with rice,False
+coral-fish,Coral Fish,https://images.unsplash.com/photo-1620894580123-466ad3a0ca06?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/LPnJ146r9Mg,Kerala fish curry,False
+shrimp-malai-curry,Shrimp Malai Curry,https://images.unsplash.com/photo-1574653853117-0274131c2175?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/-ps36yg89Lg,Shrimp in creamy sauce bowl,False
+baila-fish,Baila Fish,https://images.unsplash.com/photo-1761314036779-84078bec535c?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/7v9U94719TE,Fish curry served with rice,False
+dry-fish-bhorta,Dry Fish Bhorta,https://images.unsplash.com/photo-1620894580123-466ad3a0ca06?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/LPnJ146r9Mg,Kerala fish curry,False
+begun-bhorta,Begun Bhorta,https://images.unsplash.com/photo-1574031491550-35f444917508?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/bD6ydkkcppA,Garden vegetable salad,False
+kola-bhorta,Kola Bhorta,https://images.unsplash.com/photo-1574031491550-35f444917508?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/bD6ydkkcppA,Garden vegetable salad,False
+tomato-chutney,Tomato Chutney,https://images.unsplash.com/photo-1773902280003-a769eb447460?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_ZuqlqSS1II,Fresh cucumber tomato carrot salad,False
+dal,Dal,https://images.unsplash.com/photo-1668337624325-e49fd5bf1446?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/3aONsy-jVQk,Lentil dal in serving bowls,False
+vegetables,Vegetables,https://images.unsplash.com/photo-1773902280003-a769eb447460?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/_ZuqlqSS1II,Fresh cucumber tomato carrot salad,False
+lebupani,Lebupani,https://images.unsplash.com/photo-1759469564313-9e3565067057?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/549EiWa6ODw,Glass of fresh lime beverage,False
+apple-juice,Apple Juice,https://images.unsplash.com/photo-1716441392930-b4daa288266a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uBpCKXiKoF0,Mango juice in glass,False
+orange-juice,Orange Juice,https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/kkrXVKK-jhg,Fresh orange juice,False
+pineapple-juice,Pineapple Juice,https://images.unsplash.com/photo-1541085681957-a433bdafd5b9?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/5fcUzWMSEik,Pineapple juice in glass,False
+mango-juice,Mango Juice,https://images.unsplash.com/photo-1716441392930-b4daa288266a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uBpCKXiKoF0,Mango juice in glass,False
+green-mango-juice,Green Mango Juice,https://images.unsplash.com/photo-1716441392930-b4daa288266a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uBpCKXiKoF0,Mango juice in glass,False
+watermelon-juice,Watermelon Juice,https://images.unsplash.com/photo-1721363005841-3831c567788d?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/m1Yrmby6unM,Watermelon juice,False
+papaya-juice,Papaya Juice,https://images.unsplash.com/photo-1716441392930-b4daa288266a?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/uBpCKXiKoF0,Mango juice in glass,False
+lassi-regular,Lassi Regular,https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,False
+mint-lassi,Mint Lassi,https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,False
+borhani-250ml,Borhani (250ml),https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,False
+borhani-500ml,Borhani (500ml),https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,False
+borhani-1-litre,Borhani (1 litre),https://images.unsplash.com/photo-1675064982913-067b64880f5f?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/T6S7L4DoeDY,Lassi in clay glass,False
+faluda-regular,Faluda Regular,https://images.unsplash.com/photo-1630823185508-53c3c6566660?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/2q9Ml8q-1bk,Falooda dessert drink,False
+faluda-special,Faluda Special,https://images.unsplash.com/photo-1630823185508-53c3c6566660?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/2q9Ml8q-1bk,Falooda dessert drink,False
+firni,Firni,https://images.unsplash.com/photo-1777613112969-d7511ddfbe15?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/9Gm-wNAaWzg,Traditional creamy rice pudding,False
+pudding,Pudding,https://images.unsplash.com/photo-1532556660262-1c45d5fae825?auto=format&fit=crop&w=960&q=78,https://unsplash.com/photos/PerJ_q-EuKw,Caramel custard/flan,False

@@ -1,6 +1,6 @@
 # Chap Khana — React + TypeScript restaurant ordering platform
 
-**Version:** 3.0.0 (brand + catalog update) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
+**Version:** 3.2.0 (brand + menu reference photography) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
 
 This repository is a component-based rebuild of the prior vanilla-JS Chap Khana showcase/ordering prototype. Includes bilingual storefront, live-priced menu, local demo mode, cart, pickup/delivery checkout, idempotent PostgreSQL RPC, order tracking, Google login, account order history, staff dashboard, menu editor and settings.
 
@@ -35,6 +35,7 @@ supabase/
   02_existing_google_upgrade.sql     Run only for a pre-Google legacy database
   migrations/03_production_hardening.sql  Run for both fresh and upgraded DBs
   migrations/04_brand_menu_catalog.sql  Run AFTER 03 to import 56 public dishes + 37 hidden drafts
+  migrations/05_reference_food_images.sql Run AFTER 04 to add photos ONLY to empty image_url fields
 ```
 
 Key security boundaries:
@@ -53,14 +54,16 @@ Key security boundaries:
 
 1. Run `supabase/01_fresh_schema.sql` in Supabase SQL Editor.
 2. Run `supabase/migrations/03_production_hardening.sql`.
-3. Leave `accepting_orders=false` until owner-approved menus and anti-abuse measures are in place. Seed dish prices are NULL.
+3. Run `supabase/migrations/04_brand_menu_catalog.sql`, then `supabase/migrations/05_reference_food_images.sql`.
+4. Leave `accepting_orders=false` until owner-approved menus and anti-abuse measures are in place. Nine catalog entries have unconfirmed prices.
 
 ### Existing Chap Khana database
 
 1. **Back up the database first** and test on a staging clone.
 2. If your old database predates Google customer accounts, run `supabase/02_existing_google_upgrade.sql`; otherwise skip it.
 3. Run `supabase/migrations/03_production_hardening.sql`. It does not reset menu or existing orders.
-4. Verify `public.place_order_v2` appears in Supabase's database functions.
+4. Run `04_brand_menu_catalog.sql` if not already applied; run `05_reference_food_images.sql` to fill only blank image URLs.
+5. Verify `public.place_order_v2` appears in Supabase's database functions.
 
 ### Assign real admin role
 
@@ -132,3 +135,10 @@ Do not execute this SQL from the browser or create public role-assignment APIs.
 - Run `npm run test:catalog` to test the JSON data and SQL seed without installing third-party dependencies. The standard `npm test` still runs the existing Vitest suite after installing npm dependencies.
 
 Official references: [React](https://react.dev/learn), [Vite](https://vite.dev/guide/), [Supabase Auth](https://supabase.com/docs/guides/auth), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+
+## Online menu reference photos (v3.2)
+
+All **93 catalog entries** (56 visible + 37 admin drafts) have illustrative Unsplash reference photo URLs with per-item photo source-page links in `docs/FOOD-IMAGE-SOURCES.csv`. Variants sometimes reuse visually appropriate reference photos. These images **are not photos of Chap Khana's actual dishes**. The React component gives priority to an owner's `menu_items.image_url` and falls back to the catalog image only if it is empty; failed remote images display category-specific food icon/gradient instead of the repeated brand logo.
+
+**Apply images to the real Supabase DB:** After `04_brand_menu_catalog.sql`, paste and run `supabase/migrations/05_reference_food_images.sql` in SQL Editor. Re-running is safe; custom images, pricing, availability and orders are untouched. You still must deploy the React source to Vercel. The photos link to a third-party CDN; test actual loading on mobile and desktop, replace with original restaurant photography when available, and observe the photographer source links and [Unsplash License](https://unsplash.com/license).

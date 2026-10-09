@@ -3,9 +3,30 @@ import { ArrowUpRight, Plus } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { money, validImage } from '../lib/utils';
 import type { MenuItem } from '../types';
+// The menu catalog provides illustrative reference photos when a Supabase row or an
+// old browser-local demo menu has an empty image_url. Owner-uploaded photos always win.
+import { referenceImageFor } from '../data/referenceImages';
+
+const foodIcons: Record<string, string> = {
+  chap: '🍗', beef: '🍖', grill: '🍢', naan: '🫓', rice: '🍛', salad: '🥗',
+  drinks: '🥤', shakes: '🥛', coffee: '☕', juice: '🧃', dessert: '🍮',
+  special: '🍽️', sides: '🥣'
+};
+
 export function DishImage({item,large=false}:{item:MenuItem;large?:boolean}) {
-  const [failed,setFailed]=useState(false);
-  return <div className={`dish-image ${large?'h-full':''}`}>{!failed&&validImage(item.image_url) ? <img src={item.image_url} alt={`Illustrative photo for ${item.name}`} loading="lazy" onError={()=>setFailed(true)}/> : <div className={`dish-fallback dish-fallback-${item.category}`}><img src="/brand/chap-khana-logo.png" alt="" aria-hidden="true" className="dish-brand-watermark"/><span className="dish-fallback-title">{item.name_bn || item.name}</span><small>চাপ খানা • CHAP KHANA</small></div>}</div>;
+  const [failedUrl, setFailedUrl] = useState('');
+  const url = validImage(item.image_url) ? item.image_url : referenceImageFor(item.id);
+  const showImage = Boolean(url && failedUrl !== url);
+
+  return <div className={`dish-image ${large ? 'h-full' : ''}`}>
+    {showImage ? <img key={url} src={url} alt={`Reference food photograph representing ${item.name}`} loading="lazy" decoding="async" onError={() => setFailedUrl(url)} /> :
+      <div className={`dish-fallback dish-fallback-${item.category}`}>
+        <span className="dish-fallback-symbol" aria-hidden="true">{foodIcons[item.category] || '🍽️'}</span>
+        <span className="dish-fallback-title">{item.name_bn || item.name}</span>
+        <small>IMAGE UNAVAILABLE</small>
+      </div>}
+    {!large && <span className="dish-image-reference">ILLUSTRATIVE PHOTO</span>}
+  </div>;
 }
 export default function DishCard({item}:{item:MenuItem}) {
   const {locale,t,add,settings}=useShop();const canOrder=Boolean(item.price&&item.available&&settings.accepting_orders);

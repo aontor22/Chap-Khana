@@ -1,6 +1,6 @@
 # Chap Khana menu / branding review (8–9 October 2026)
 
-**Source:** Six screenshots/photographs supplied by the user in this chat. Photos were used as transcribing references, **not reproduced in the website**. Product illustrations are branded placeholders rather than inaccurate third-party food photos.
+**Source:** Six screenshots/photographs supplied by the user in this chat. Photos were used as transcribing references, **not reproduced in the website**. **Update v3.2:** Product images now show third-party illustrative food reference photos from Unsplash. These are *not* photos of dishes prepared by Chap Khana; the original restaurant-provided menu images were used only as references.
 
 ## What is included
 
@@ -8,6 +8,7 @@
 - **37 admin-only drafts:** older/possibly branch-specific black-background printed menu, including lunch, fish dishes, juices, borhani, desserts. Drafts have `active=false`, `available=false`. They do not show in the public catalog and cannot be ordered.
 - Source of truth for this initial import: `src/data/menu-catalog.json`.
 - Database sync: `supabase/migrations/04_brand_menu_catalog.sql`.
+- Image URLs: `supabase/migrations/05_reference_food_images.sql`, preserving existing owner-uploaded photos and all prices. Image-by-image source credits and descriptions: `docs/FOOD-IMAGE-SOURCES.csv`.
 
 **Important:** Printed menu photos may be old and there are visible price conflicts between the black printed menus and the later beige Bangla menu. This project **does not** claim that any price is owner-confirmed. The online-ordering flag is not enabled by the import.
 
@@ -46,3 +47,11 @@ For these rows, the menu photos have two prices on one line, hard-to-read number
 The import inserts all 93 catalog rows. **Existing rows with non-null prices are never overwritten**, to preserve an owner's manual edits; rows with null prices may be upgraded from the original seed. It does not change any existing orders, checkout records, or order-acceptance settings. Original placeholder `grilled-chicken` is hidden only if its price is still unset.
 
 **Changes to catalog data after you ran the SQL are not automatically synced.** For future menu updates, use the staff dashboard or a versioned migration. Do not run the entire fresh schema against a live project.
+
+## v3.2 reference photos
+
+After the existing `04_brand_menu_catalog.sql` migration, run `05_reference_food_images.sql` in Supabase SQL Editor. The image-only migration updates **only NULL/empty** `image_url` fields for matching menu IDs. Re-running is safe. Changing React files or deploying on Vercel does not update Supabase database rows automatically.
+
+All 93 entries get illustrative food images (56 customer-visible, 37 admin-only drafts). Similar variants may share a relevant reference picture; the images do not guarantee the exact presentation, ingredients, size or appearance of Chap Khana's actual dish. For long-term reliability, replace these third-party CDN URLs with verified restaurant photos in Supabase Storage. If the remote image fails, product cards now show a category-specific food illustration instead of repeating the entire Chap Khana logo.
+
+Photos were selected from Unsplash pages listed in `FOOD-IMAGE-SOURCES.csv` and labelled `ILLUSTRATIVE PHOTO` on product cards. The restaurant logo remains the transparent brand asset in `public/brand/`.
