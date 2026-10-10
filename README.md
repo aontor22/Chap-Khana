@@ -146,3 +146,6 @@ All **93 catalog entries** (56 visible + 37 admin drafts) have illustrative Unsp
 
 ### Per-item discounts (v3.3)
 Run `supabase/migrations/06_item_discounts.sql` **after** the earlier fresh schema/hardening/catalog scripts and before deploying this frontend. Then Admin > Menu > Edit > Item discount to set % or ৳ off. See `docs/ITEM-DISCOUNTS-BN.md`. Discounts are computed in the database, not trusted from the browser.
+
+### v3.4 — Direct admin navigation
+Approved Supabase staff now have a responsive Admin shortcut in the header, mobile menu and Account page. A normal Google login routes authorized staff directly to `/admin`; ordinary customers remain on `/account`. Existing `admin_users` RLS is authoritative. No additional SQL migration is required. See [`docs/ADMIN-NAVIGATION-v3.4-BN.md`](docs/ADMIN-NAVIGATION-v3.4-BN.md) for troubleshooting, testing and deployment.

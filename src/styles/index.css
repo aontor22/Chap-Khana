@@ -24,6 +24,10 @@
   .language{@apply py-2 px-3 border border-[#d6c9bc] text-xs font-bold hover:bg-[#f7eae0];}
   .cart-header{@apply flex gap-2.5 items-center bg-[#291c17] text-white py-3 px-3.5 sm:px-4 text-xs font-bold;}
   .cart-counter{@apply rounded-full text-[#301b12] bg-[#e9b288] w-5 h-5 grid place-items-center text-[10px];}
+  .admin-shortcut{@apply items-center gap-2 rounded-md bg-[#fff0df] border border-[#d9b49a] text-[#9f3922] py-2.5 px-3 text-xs font-extrabold hover:bg-[#ffe5ca] transition-colors whitespace-nowrap;}
+  .admin-account-panel{@apply flex flex-col sm:flex-row sm:items-center justify-between gap-5 rounded-xl border border-[#dca67f] bg-gradient-to-br from-[#2a1a14] to-[#653120] text-[#fff7ef] p-6 sm:p-7;}
+  .admin-account-icon{@apply rounded-lg bg-white/10 p-3 shrink-0;}
+  .admin-account-action{@apply inline-flex justify-center items-center gap-2 shrink-0 bg-[#e9ac6b] text-[#291811] hover:bg-[#ffd0a2] transition-colors px-5 py-3 text-sm font-extrabold rounded-md;}
   .mobile-nav{@apply flex flex-col gap-4 px-6 py-5 bg-[#fffaf4] border-t border-[#eee1d5] lg:hidden font-bold text-sm;}
   .demo-banner{@apply bg-[#fff3e3] text-[#956547] text-xs text-center py-2.5 px-3 border-b border-[#f1dfcc];}
   .demo-banner span{@apply font-bold;}

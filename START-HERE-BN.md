@@ -85,3 +85,6 @@ Full feature matrix ও developer notes: `README.md`।
 
 ## v3.3 Item-wise Discount (NEW)
 আগের 01/03/04/05 SQL run করা থাকলে database না মুছে **`supabase/migrations/06_item_discounts.sql`** run করুন। তারপর GitHub push ও Vercel redeploy দিন। `/admin` → Menu → Edit-এ নতুন **Item discount** control আছে। `docs/ITEM-DISCOUNTS-BN.md`-তে সম্পূর্ণ ব্যবহারবিধি রয়েছে।
+
+### v3.4 — অ্যাডমিন ড্যাশবোর্ডে সরাসরি প্রবেশ
+Google দিয়ে লগইন করার পর Supabase `admin_users`-এ অনুমোদন থাকলে Admin Dashboard-এ সরাসরি যাবে। এরপর ওয়েবসাইটের header-এ **Admin**, mobile menu-তে **Staff Dashboard**, ও My Account-এ **Manage Chap Khana** দেখতে পাবে। নতুন admin হিসেবে অনুমোদন দিলে My Account-এর **Recheck staff access** ব্যবহার করো। এই আপডেটের জন্য নতুন SQL চালানোর প্রয়োজন নেই। বিস্তারিত: `docs/ADMIN-NAVIGATION-v3.4-BN.md`।

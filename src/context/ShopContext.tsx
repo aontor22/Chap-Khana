@@ -4,15 +4,17 @@ import { supabase } from '../lib/supabase';
 import { isConfigured } from '../lib/config';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
-import { getMenu, getSettings } from '../data/api';
+import { getMenu, getSettings, isStaff } from '../data/api';
 import type { Cart, Locale, MenuItem, StoreSettings } from '../types';
 import { demoSettings } from '../data/demo';
 import { getText } from '../data/i18n';
 
 type TextType = ReturnType<typeof getText>;
+export type AdminAccessStatus = 'checking' | 'allowed' | 'denied' | 'error';
+type RoleLookup = { userId:string; status:AdminAccessStatus; error:string|null };
 interface ShopState {
   live:boolean; locale:Locale; setLocale:(lang:Locale)=>void; t:TextType;
-  user:User|null; authLoading:boolean; signInGoogle:(returnTo?:string)=>Promise<void>; signInPassword:(email:string,password:string)=>Promise<void>; signOut:()=>Promise<void>;
+  user:User|null; authLoading:boolean; adminStatus:AdminAccessStatus; adminError:string|null; refreshAdminAccess:()=>Promise<void>; signInGoogle:(returnTo?:string)=>Promise<void>; signInPassword:(email:string,password:string)=>Promise<void>; signOut:()=>Promise<void>;
   menu:MenuItem[]; settings:StoreSettings; loading:boolean; error:string|null; refresh:()=>Promise<void>;
   cart:Cart; count:number; subtotal:number; add:(id:string)=>void; decrease:(id:string)=>void; remove:(id:string)=>void; clearCart:()=>void;
   alert:string; notify:(message:string)=>void;
@@ -27,6 +29,7 @@ export function ShopProvider({children}:{children:ReactNode}) {
   const [error,setError]=useState<string|null>(null);
   const [user,setUser]=useState<User|null>(null);
   const [authLoading,setAuthLoading]=useState(Boolean(supabase));
+  const [roleLookup,setRoleLookup]=useState<RoleLookup|null>(null);
   const [alert,setAlert]=useState('');
   const notify=useCallback((s:string)=>setAlert(s),[]);
   const setLocale=(lang:Locale)=>{setLocaleInner(lang);saveStorage('ckr_lang',lang);document.documentElement.lang=lang;};
@@ -49,6 +52,32 @@ export function ShopProvider({children}:{children:ReactNode}) {
     const {data:{subscription}}=client.auth.onAuthStateChange((_event,session)=>{setUser(session?.user||null);setAuthLoading(false);});
     return ()=>{active=false;subscription.unsubscribe();};
   },[]);
+  // Resolve staff membership from the server-side allowlist, never from a Google
+  // email, user_metadata, or a flag in localStorage. A role is bound to its user ID.
+  useEffect(()=>{
+    if (!isConfigured || authLoading || !user) {setRoleLookup(null);return;}
+    let current=true;
+    setRoleLookup({userId:user.id,status:'checking',error:null});
+    void isStaff(user.id).then(allowed=>{
+      if(current)setRoleLookup({userId:user.id,status:allowed?'allowed':'denied',error:null});
+    }).catch(error=>{
+      if(current)setRoleLookup({userId:user.id,status:'error',error:error instanceof Error?error.message:'Could not verify staff access.'});
+    });
+    return ()=>{current=false;};
+  },[user?.id,authLoading]);
+  const refreshAdminAccess=useCallback(async()=>{
+    if(!isConfigured || !user || authLoading)return;
+    const uid=user.id;
+    setRoleLookup({userId:uid,status:'checking',error:null});
+    try{
+      const allowed=await isStaff(uid);
+      setRoleLookup(prev=>prev?.userId===uid?{userId:uid,status:allowed?'allowed':'denied',error:null}:prev);
+    }catch(error){
+      setRoleLookup(prev=>prev?.userId===uid?{userId:uid,status:'error',error:error instanceof Error?error.message:'Could not verify staff access.'}:prev);
+    }
+  },[user?.id,authLoading]);
+  const adminStatus:AdminAccessStatus=!isConfigured?'allowed':authLoading?'checking':!user?'denied':roleLookup?.userId!==user.id?'checking':roleLookup.status;
+  const adminError=adminStatus==='error'?roleLookup?.error||'Staff verification failed.':null;
   const signInGoogle=async(returnTo='/account')=>{
     if(!supabase){notify('Google sign-in is available after Supabase configuration.');return;}
     sessionStorage.setItem('ckr_auth_destination',returnTo);
@@ -70,10 +99,10 @@ export function ShopProvider({children}:{children:ReactNode}) {
   const clearCart=()=>setCart({});
   const count=Object.values(cart).reduce((s,n)=>s+(Number.isInteger(n)&&n>0?n:0),0);
   const subtotal=menu.reduce((s,m)=>s+(discountedUnitPrice(m)||0)*(cart[m.id]||0),0);
-  const value=useMemo<ShopState>(()=>({live:isConfigured,locale,setLocale,t:getText(locale),user,authLoading,signInGoogle,signInPassword,signOut,menu,settings,loading,error,refresh,cart,count,subtotal,add,decrease,remove,clearCart,alert,notify}),
+  const value=useMemo<ShopState>(()=>({live:isConfigured,locale,setLocale,t:getText(locale),user,authLoading,adminStatus,adminError,refreshAdminAccess,signInGoogle,signInPassword,signOut,menu,settings,loading,error,refresh,cart,count,subtotal,add,decrease,remove,clearCart,alert,notify}),
     // These handlers depend on current cart/menu/auth; memoization is for one consistent context snapshot.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale,user,authLoading,menu,settings,loading,error,refresh,cart,count,subtotal,alert]);
+    [locale,user,authLoading,adminStatus,adminError,refreshAdminAccess,menu,settings,loading,error,refresh,cart,count,subtotal,alert]);
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
 }
 export function useShop(){const context=useContext(ShopContext);if(!context)throw new Error('useShop must be inside ShopProvider');return context;}

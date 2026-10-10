@@ -45,3 +45,10 @@
 - Admin can set percentage or fixed-amount discounts per menu item, turn them off, and preview final price.
 - Customer menu, cart, checkout and local demo totals show discounted price and savings.
 - Supabase migration 06 updates server-validated checkout and stores per-item original/discounted price snapshots. Existing orders are preserved.
+
+## v3.4.0 — Staff dashboard discovery and login routing
+- Centralized Supabase staff membership lookup across the full React application; never infer staff privilege from the Google email address or OAuth profile fields.
+- Added a highlighted desktop Admin shortcut, a permission-aware mobile Staff Dashboard link, and an Account page management card for approved staff.
+- Google sign-in from the regular Account page routes approved staff to `/admin` after membership verification. Customer sign-ins remain on `/account`; explicit checkout/track redirect requests are respected.
+- Added retry access verification for newly approved admins and transient database lookup errors, plus clearing of old dashboard data on loss of staff access.
+- Kept existing RLS rules, order data, menu prices, per-item discounts, Supabase migrations, and payment settings unchanged. No SQL migration needed for this UI update.
