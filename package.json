@@ -1,7 +1,7 @@
 {
   "name": "chap-khana-react",
   "private": true,
-  "version": "3.4.0",
+  "version": "3.5.0",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "test": "vitest run",
-    "test:catalog": "node --test tests/catalog.test.mjs tests/discount-sql.test.mjs tests/admin-access-source.test.mjs",
+    "test:catalog": "node --test tests/catalog.test.mjs tests/discount-sql.test.mjs tests/admin-access-source.test.mjs tests/store-settings-source.test.mjs",
     "audit:production": "npm audit --omit=dev"
   },
   "dependencies": {

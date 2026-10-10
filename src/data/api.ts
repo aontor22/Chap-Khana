@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
+import { normalizeStoreSettings } from '../lib/storeProfile';
 import { demoMenu, demoSettings } from './demo';
 import type { Cart, CheckoutInfo, MenuItem, Order, OrderReceipt, OrderStatus, StoreSettings, TrackingResult } from '../types';
 
@@ -12,9 +13,9 @@ export const getMenu = async (): Promise<MenuItem[]> => {
   return (data || []) as MenuItem[];
 };
 export const getSettings = async (): Promise<StoreSettings> => {
-  if (!supabase) return fromStorage('ckr_demo_settings',demoSettings);
+  if (!supabase) return normalizeStoreSettings(fromStorage('ckr_demo_settings',demoSettings));
   const {data,error}=await db().from('store_settings').select('*').eq('id',1).single(); fail(error);
-  return data as StoreSettings;
+  return normalizeStoreSettings(data as Partial<StoreSettings>);
 };
 export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[], settings: StoreSettings, requestId: string): Promise<OrderReceipt> => {
   const items=Object.entries(cart).filter(([,qty])=>qty>0).map(([id,qty])=>({id,qty}));
@@ -63,6 +64,6 @@ export const saveMenuItem=async (item:MenuItem):Promise<void>=>{
   const {error}=await db().from('menu_items').upsert(item,{onConflict:'id'});fail(error);
 };
 export const saveStoreSettings=async (settings:StoreSettings):Promise<void>=>{
-  if (!supabase) {saveStorage('ckr_demo_settings',settings);return;}
-  const {error}=await db().from('store_settings').update({accepting_orders:settings.accepting_orders,delivery_enabled:settings.delivery_enabled,pickup_enabled:settings.pickup_enabled,delivery_fee:settings.delivery_fee}).eq('id',1);fail(error);
+  if (!supabase) {saveStorage('ckr_demo_settings',normalizeStoreSettings(settings));return;}
+  const {data,error}=await db().from('store_settings').update({accepting_orders:settings.accepting_orders,delivery_enabled:settings.delivery_enabled,pickup_enabled:settings.pickup_enabled,delivery_fee:settings.delivery_fee,contact_phone:settings.contact_phone,whatsapp_phone:settings.whatsapp_phone,address_text:settings.address_text,maps_url:settings.maps_url,facebook_url:settings.facebook_url,instagram_url:settings.instagram_url,hours_note:settings.hours_note,announcement:settings.announcement,dine_in_enabled:settings.dine_in_enabled,weekly_hours:settings.weekly_hours}).eq('id',1).select('id').single();fail(error);if(!data)throw new Error('Store settings update was not confirmed.');
 };

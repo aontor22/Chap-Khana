@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Clock3, Flame, MapPin, PhoneCall, Search, UtensilsCrossed, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight, Clock3, Facebook, Flame, Instagram, MapPin, MessageCircle, PhoneCall, Search, UtensilsCrossed, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import DishCard from '../components/DishCard';
 import { useShop } from '../context/ShopContext';
-import { config } from '../lib/config';
+import { phoneHref, safeExternalUrl, whatsappHref } from '../lib/storeProfile';
+import RestaurantHours from '../components/RestaurantHours';
 import { MENU_CATEGORIES, type Category } from '../types';
 
 export default function Home(){
-  const {t,locale,menu,settings,loading,error,refresh}=useShop();const [cat,setCat]=useState<'all'|Category>('all');const [search,setSearch]=useState(''); const location=useLocation();
+  const {t,locale,menu,settings,loading,error,refresh}=useShop();
+  const maps=safeExternalUrl(settings.maps_url);const phone=phoneHref(settings.contact_phone);const facebook=safeExternalUrl(settings.facebook_url);const instagram=safeExternalUrl(settings.instagram_url);const whatsApp=whatsappHref(settings.whatsapp_phone);const [cat,setCat]=useState<'all'|Category>('all');const [search,setSearch]=useState(''); const location=useLocation();
   useEffect(()=>{if(location.pathname==='/menu'){document.getElementById('our-menu')?.scrollIntoView({behavior:'smooth'});}else if(location.hash)document.getElementById(location.hash.slice(1))?.scrollIntoView({behavior:'smooth'});},[location.pathname,location.hash]);
   const cats=useMemo<Array<'all'|Category>>(()=>['all',...MENU_CATEGORIES.filter(c=>menu.some(m=>m.active&&m.category===c))],[menu]);
   useEffect(()=>{if(cat!=='all'&&!menu.some(m=>m.active&&m.category===cat))setCat('all');},[menu,cat]);
@@ -15,8 +17,8 @@ export default function Home(){
   return <>
     <section className="hero"><div className="hero-texture" aria-hidden="true"/><div className="site-wrap relative z-10 grid lg:grid-cols-[1.05fr_.95fr] gap-10 items-center min-h-[560px] lg:min-h-[620px] py-20">
       <div><div className="hero-kicker"><span className="small-star"/> {t.locationTag}</div><h1 className={`hero-heading ${locale==='bn'?'bn-heading':''}`}>{t.headline}<br/><em>{t.mood}</em></h1><p className="hero-desc">{t.lead}</p>
-        <div className="flex flex-wrap gap-3 mt-8"><a className="btn-primary" href="#our-menu">{t.open} <ArrowRight size={17}/></a><a className="btn-outline" href={config.maps} target="_blank" rel="noopener noreferrer"><MapPin size={17}/> {t.directions}</a></div>
-        <div className="hero-metadata"><span>✳ &nbsp; DINE IN</span><span>✳ &nbsp; TAKEAWAY</span><span>✳ &nbsp; KHILKHET</span></div>
+        <div className="flex flex-wrap gap-3 mt-8"><a className="btn-primary" href="#our-menu">{t.open} <ArrowRight size={17}/></a>{maps&&<a className="btn-outline" href={maps} target="_blank" rel="noopener noreferrer"><MapPin size={17}/> {t.directions}</a>}</div>
+        <div className="hero-metadata">{settings.dine_in_enabled&&<span>✳ &nbsp; DINE IN</span>}{settings.pickup_enabled&&<span>✳ &nbsp; TAKEAWAY</span>}<span>✳ &nbsp; KHILKHET</span></div>
       </div><div className="hidden lg:block hero-visual"><div className="hero-photo"><img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1100&q=86" alt="Illustrative grilled food platter" onError={e=>{e.currentTarget.style.display='none';}}/></div><div className="hero-roundel"><Flame size={32}/><span>FLAVOUR<br/>STARTS HERE</span></div><div className="hero-photo-label">A LITTLE SMOKE, A LOT OF FLAVOUR</div></div>
     </div></section>
     <div className="ticker"><div className="site-wrap flex justify-between gap-6"><span>HOT OFF THE GRILL</span><span>✳</span><span>MADE WITH LOVE</span><span>✳</span><span>LOCAL FLAVOUR</span><span className="hidden sm:inline">✳</span><span className="hidden sm:inline">GOOD FOOD, NO FUSS</span></div></div>
@@ -28,7 +30,24 @@ export default function Home(){
       <p className="text-[#9c8d82] text-xs mt-6">✳ Menu names and prices are transcribed from photos you provided (including a coffee menu). Food photography is illustrative reference imagery, not photos of dishes prepared by Chap Khana. Printed menus may differ by date or branch. Please verify all prices with the restaurant before accepting live orders.</p>
     </section>
     <section id="story" className="story-section"><div className="site-wrap py-20 md:py-24 grid lg:grid-cols-2 gap-12 items-center"><div className="story-image"><img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=80" alt="Illustrative warm restaurant interior" onError={e=>e.currentTarget.style.display='none'}/><div className="story-stamp">FOOD <span>+</span> FRIENDS</div></div><div><div className="section-kicker text-[#efa575]">{t.enjoy}</div><h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mt-5">Made for the<br/><span className="font-display italic text-spice">good times.</span></h2><p className="text-[#cebeb4] text-base leading-8 mt-7 max-w-[450px]">{t.intro}</p><div className="border-t border-white/20 mt-8 pt-6 flex gap-7 text-[#e4b68f] text-xs tracking-widest"><span>CHAP KHANA</span><span>✳</span><span>KHILKHET</span></div></div></div></section>
-    <section id="find-us" className="site-wrap py-20 md:py-28 grid lg:grid-cols-2 gap-12 items-center"><div><div className="section-kicker"><span/> GET IN TOUCH</div><h2 className="section-heading max-w-[430px]">{t.tagline}</h2><p className="text-[#7b716a] mt-6 leading-7">{config.address}. Find us on Google Maps or give us a call.</p><div className="mt-8 space-y-5"><a className="flex items-center gap-3 font-semibold" href={config.maps} target="_blank" rel="noopener noreferrer"><MapPin size={19} className="text-ember"/>{config.address}</a><a className="flex items-center gap-3 font-semibold" href={`tel:${config.phone}`}><PhoneCall size={19} className="text-ember"/>{config.phone}</a><p className="flex items-center gap-3 text-[#8a7b6d] text-sm"><Clock3 size={19} className="text-ember"/> Opening hours: please call to confirm</p></div><a href={config.maps} target="_blank" rel="noopener noreferrer" className="btn-primary mt-8 inline-flex">{t.directions}<ArrowRight size={18}/></a></div>
-      <div className="contact-visual"><div className="font-display italic text-5xl md:text-6xl text-white mb-5">Meet us at<br/>the table.</div><div className="flex items-center gap-2 text-spice tracking-widest text-xs font-bold"><UtensilsCrossed size={19}/> GOOD FOOD · GOOD COMPANY</div><div className="absolute bottom-7 right-7"><Link to="/menu" className="circle-link" aria-label="Browse menu"><ArrowRight size={25}/></Link></div></div></section>
+    <section id="find-us" className="site-wrap py-20 md:py-28 grid lg:grid-cols-2 gap-12 items-start"><div>
+      <div className="section-kicker"><span/> GET IN TOUCH</div>
+      <h2 className="section-heading max-w-[430px]">{t.tagline}</h2>
+      <p className="text-[#7b716a] mt-6 leading-7">{settings.address_text}. Visit, call, or reach us through our official social pages.</p>
+      <div className="mt-7 space-y-4">
+        {maps&&<a className="flex items-center gap-3 font-semibold" href={maps} target="_blank" rel="noopener noreferrer"><MapPin size={19} className="text-ember"/>{settings.address_text}</a>}
+        {phone&&<a className="flex items-center gap-3 font-semibold" href={phone}><PhoneCall size={19} className="text-ember"/>{settings.contact_phone}</a>}
+      </div>
+      <div className="flex flex-wrap gap-3 mt-7">
+        {facebook&&<a className="social-button" href={facebook} target="_blank" rel="noopener noreferrer"><Facebook size={17}/> Facebook</a>}
+        {instagram&&<a className="social-button" href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={17}/> Instagram</a>}
+        {whatsApp&&<a className="social-button" href={whatsApp} target="_blank" rel="noopener noreferrer"><MessageCircle size={17}/> WhatsApp</a>}
+      </div>
+      {maps&&<a href={maps} target="_blank" rel="noopener noreferrer" className="btn-primary mt-8 inline-flex">{t.directions}<ArrowRight size={18}/></a>}
+    </div>
+    <div className="space-y-6">
+      <div className="panel p-5 sm:p-7"><RestaurantHours/></div>
+      <div className="contact-visual !min-h-[240px]"><div className="font-display italic text-4xl md:text-5xl text-white mb-5">Meet us at<br/>the table.</div><div className="flex items-center gap-2 text-spice tracking-widest text-xs font-bold"><UtensilsCrossed size={19}/> GOOD FOOD · GOOD COMPANY</div></div>
+    </div></section>
   </>;
 }

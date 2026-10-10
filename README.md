@@ -149,3 +149,8 @@ Run `supabase/migrations/06_item_discounts.sql` **after** the earlier fresh sche
 
 ### v3.4 — Direct admin navigation
 Approved Supabase staff now have a responsive Admin shortcut in the header, mobile menu and Account page. A normal Google login routes authorized staff directly to `/admin`; ordinary customers remain on `/account`. Existing `admin_users` RLS is authoritative. No additional SQL migration is required. See [`docs/ADMIN-NAVIGATION-v3.4-BN.md`](docs/ADMIN-NAVIGATION-v3.4-BN.md) for troubleshooting, testing and deployment.
+
+
+## Restaurant profile / opening hours (v3.5)
+
+After migration `supabase/migrations/07_restaurant_profile_hours.sql`, Admin → Settings supports per-day opening hours (Asia/Dhaka), phone, address, optional WhatsApp and Instagram, Facebook, Maps, dine-in, announcements, pickup/delivery and fee. Information appears in homepage and footer. Schedule visibility does not automatically determine the backend `accepting_orders` flag; explicitly pause orders when the business is unavailable. No existing order rows or discounts are modified.

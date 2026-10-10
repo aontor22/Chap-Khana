@@ -52,3 +52,10 @@
 - Google sign-in from the regular Account page routes approved staff to `/admin` after membership verification. Customer sign-ins remain on `/account`; explicit checkout/track redirect requests are respected.
 - Added retry access verification for newly approved admins and transient database lookup errors, plus clearing of old dashboard data on loss of staff access.
 - Kept existing RLS rules, order data, menu prices, per-item discounts, Supabase migrations, and payment settings unchanged. No SQL migration needed for this UI update.
+
+
+## v3.5.0 — Restaurant profile & hours
+- Added admin-editable business contact, Facebook, optional WhatsApp/Instagram, Maps, dine-in and opening hours.
+- Published hours, location and social links in responsive homepage/footer.
+- Added an independent public announcement banner, safe URL/phone validation, new migration 07.
+- Online ordering switch remains independent of business-hours display.

@@ -145,3 +145,12 @@
 
 /* Per-item offers on food cards (v3.3) */
 .discount-ribbon { position: absolute; top: 14px; right: 14px; z-index: 2; border-radius: 10px; padding: 7px 11px; font-size: 12px; font-weight: 850; letter-spacing: .03em; background: #137a42; color: white; box-shadow: 0 4px 15px #0003; }
+
+/* Restaurant profile & timetable, responsive on phones */
+.hours-edit-row {border:1px solid #eaded0;border-radius:10px;padding:14px;background:#fffaf5;}
+@media (min-width:720px){.hours-edit-row {display:grid;grid-template-columns:175px 1fr 145px;align-items:center;gap:14px}.hours-edit-row>div:nth-child(2){margin-top:0}.hours-edit-row>p{margin:0;text-align:right}}
+.hours-status{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;}
+.hours-open{background:#e1f3e6;color:#1c6d38}.hours-closed{background:#fbe9e2;color:#9b381c}
+.social-button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;background:#fff4ea;color:#783c21;border:1px solid #e6cdb8;font-weight:700;font-size:13px;}
+.social-button:hover{background:#fde8d5}
+.public-announcement{background:#fce6d7;color:#762f19;border-bottom:1px solid #f2c7aa;padding:12px 20px;text-align:center;font-size:13px;font-weight:600;}

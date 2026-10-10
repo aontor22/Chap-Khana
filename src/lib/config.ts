@@ -4,7 +4,4 @@ export const isConfigured = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(rawUrl)
 export const config = {
   supabaseUrl: rawUrl, supabaseKey: rawKey,
   name: 'Chap Khana',
-  phone: '01870-203065', // Verify with owner before production.
-  address: 'East Namapara, Khilkhet, Dhaka', // Verify with owner.
-  maps: 'https://maps.app.goo.gl/gjk9EttHXfm8X51v6',
 };

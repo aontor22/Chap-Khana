@@ -88,3 +88,6 @@ Full feature matrix ও developer notes: `README.md`।
 
 ### v3.4 — অ্যাডমিন ড্যাশবোর্ডে সরাসরি প্রবেশ
 Google দিয়ে লগইন করার পর Supabase `admin_users`-এ অনুমোদন থাকলে Admin Dashboard-এ সরাসরি যাবে। এরপর ওয়েবসাইটের header-এ **Admin**, mobile menu-তে **Staff Dashboard**, ও My Account-এ **Manage Chap Khana** দেখতে পাবে। নতুন admin হিসেবে অনুমোদন দিলে My Account-এর **Recheck staff access** ব্যবহার করো। এই আপডেটের জন্য নতুন SQL চালানোর প্রয়োজন নেই। বিস্তারিত: `docs/ADMIN-NAVIGATION-v3.4-BN.md`।
+
+## v3.5 settings, hours and Facebook
+Existing database-এ আগের 01, 03, 04, 05, 06 successful থাকলে এবার শুধু `supabase/migrations/07_restaurant_profile_hours.sql` run করবে। তারপর Admin → Settings-এ opening hours, public phone, Facebook, Google Maps, address, optional WhatsApp/Instagram, announcement edit করতে পারবে। Full guide: `docs/RESTAURANT-SETTINGS-v3.5-BN.md`।
