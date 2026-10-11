@@ -173,3 +173,13 @@
   .order-detail-overlay, .order-detail-overlay .modal-dialog { overflow:visible !important; max-height:none !important; box-shadow:none !important; border:0 !important; }
   .no-print { display:none !important; }
 }
+
+/* v3.10 customer UX: sticky mobile cart shortcut (safe-area aware). */
+.mobile-cart-bar {display:none;}
+@media (max-width: 767px) {
+  .has-mobile-cart-bar {padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));}
+  .mobile-cart-bar {position:fixed;bottom:0;left:0;right:0;z-index:65;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#b94827;color:white;font-weight:800;box-shadow:0 -5px 26px rgba(35,20,12,.2);font-size:14px;}
+  .mobile-cart-count {border-radius:999px;background:#fff2e5;color:#6c2816;padding:2px 7px;font-size:12px;}
+  .toast {bottom:calc(82px + env(safe-area-inset-bottom,0px));}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.group:hover .dish-image img{transform:none}}

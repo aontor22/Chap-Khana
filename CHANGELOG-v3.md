@@ -89,3 +89,9 @@
 - Uploaded photos are public-readable; sensitive files must not be uploaded.
 - Replaces old managed files only after successful menu save, with best-effort cleanup. Other photo URLs never deleted.
 - No order/menu schema changes; migrations 08/09 remain independent dependencies.
+
+## v3.10.0 — Mobile, SEO and progressive menu rendering
+- Customer mobile cart shortcut; progressive 12-item menu display.
+- Route-specific SEO and private-route noindex headers; sitemap/robots, improved photo layout stability.
+- Cache-friendly vendor splitting in Vite; preserves v3.9 admin photo management.
+- No database schema changes.

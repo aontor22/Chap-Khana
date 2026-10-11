@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useShop } from './context/ShopContext';
 import Layout from './components/Layout';
+import PageMeta from './components/PageMeta';
 import { postLoginPath } from './lib/adminNavigation';
 import Home from './pages/Home';
 const CartPage = lazy(() => import('./pages/Cart'));
@@ -23,7 +24,7 @@ function AuthCallback(){
   return <div className="min-h-[50vh] grid place-items-center"><div className="panel p-10" role="status">Completing secure sign-in…</div></div>;
 }
 export default function App(){
-  return <Layout><Suspense fallback={<div className="min-h-[50vh] grid place-items-center text-[#7e6556]" role="status">Loading page…</div>}><Routes>
+  return <Layout><PageMeta/><Suspense fallback={<div className="min-h-[50vh] grid place-items-center text-[#7e6556]" role="status">Loading page…</div>}><Routes>
     <Route path="/" element={<Home/>}/><Route path="/menu" element={<Home/>}/>
     <Route path="/cart" element={<CartPage/>}/><Route path="/checkout" element={<Checkout/>}/>
     <Route path="/track" element={<Track/>}/><Route path="/account" element={<Account/>}/>

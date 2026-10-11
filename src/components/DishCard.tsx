@@ -28,7 +28,7 @@ export function DishImage({item,large=false}:{item:MenuItem;large?:boolean}) {
   const ownPhoto = Boolean(url===preferredUrl && managedMenuImagePath(url,item.id,config.supabaseUrl));
 
   return <div className={`dish-image ${large ? 'h-full' : ''}`}>
-    {showImage ? <img key={url} src={url} alt={ownPhoto?`Restaurant photo of ${item.name}`:`Illustrative reference photo for ${item.name}`} loading="lazy" decoding="async" onError={() => setFailedUrls(previous => previous.includes(url)?previous:[...previous,url])} /> :
+    {showImage ? <img key={url} src={url} alt={ownPhoto?`Restaurant photo of ${item.name}`:`Illustrative reference photo for ${item.name}`} width={800} height={550} loading="lazy" decoding="async" onError={() => setFailedUrls(previous => previous.includes(url)?previous:[...previous,url])} /> :
       <div className={`dish-fallback dish-fallback-${item.category}`}>
         <span className="dish-fallback-symbol" aria-hidden="true">{foodIcons[item.category] || '🍽️'}</span>
         <span className="dish-fallback-title">{item.name_bn || item.name}</span>

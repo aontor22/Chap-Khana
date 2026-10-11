@@ -170,3 +170,6 @@ Open `/admin` → **Orders**. Use server-side search (order code, customer name,
 ## v3.9 — Admin Menu Photo Uploads
 
 Authorized admins can upload/preview/replace dish photos in **Admin → Menu → Edit**. Client-side JPEG/PNG/WebP optimization exports WebP before a restricted Supabase Storage upload. The existing image URL is updated only after Storage confirms an upload. See `docs/PHASE3-MENU-PHOTO-UPLOAD-v3.9-BN.md` for the mandatory `10_menu_image_storage.sql` migration, RLS verification and deploy steps.
+
+### v3.10 mobile/SEO update
+See `docs/PHASE3-PERFORMANCE-SEO-v3.10-BN.md`. No new SQL is required for v3.10 itself.

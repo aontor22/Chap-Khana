@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ArrowRight, Clock3, Facebook, Instagram, LayoutDashboard, MapPin, Menu, MessageCircle, Phone, ShoppingBag, X } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { getConfiguredHoursStatus, phoneHref, safeExternalUrl, whatsappHref } from '../lib/storeProfile';
@@ -7,11 +7,11 @@ import RestaurantHours from './RestaurantHours';
 
 const NavItem=({to,children,onClick}:{to:string;children:ReactNode;onClick?:()=>void})=><NavLink to={to} onClick={onClick} className={({isActive})=>`nav-link ${isActive?'nav-link-active':''}`}>{children}</NavLink>;
 export default function Layout({children}:{children:ReactNode}) {
-  const {t,locale,setLocale,count,live,alert,user,adminStatus,settings}=useShop();const [mobile,setMobile]=useState(false);
+  const {t,locale,setLocale,count,subtotal,live,alert,user,adminStatus,settings}=useShop();const [mobile,setMobile]=useState(false);const {pathname}=useLocation();
   const phone=phoneHref(settings.contact_phone);const fb=safeExternalUrl(settings.facebook_url);const instagram=safeExternalUrl(settings.instagram_url);const maps=safeExternalUrl(settings.maps_url);const whatsApp=whatsappHref(settings.whatsapp_phone);
   const openNow=getConfiguredHoursStatus(settings).openNow;
   const showAdmin=adminStatus==='allowed'&&(Boolean(user)||!live);
-  return <div className="min-h-screen flex flex-col">
+  return <div className={`min-h-screen flex flex-col ${count>0 && (pathname==='/'||pathname==='/menu')?'has-mobile-cart-bar':''}`}>
     <div className="top-ribbon"><div className="site-wrap flex items-center justify-between gap-4"><span className="flex items-center gap-1.5"><MapPin size={11}/> KHILKHET, DHAKA</span><span>{live?'CONNECTED • CHECK STORE AVAILABILITY':'DEMO MODE • ORDERS ARE NOT SENT'}</span>{phone&&<a href={phone} className="hidden sm:inline-flex items-center gap-2"><Phone size={11}/>{settings.contact_phone}</a>}</div></div>
     <header className="site-header"><div className="site-wrap flex items-center justify-between min-h-[74px] gap-4">
       <Link to="/" className="brand-link shrink-0" aria-label="চাপ খানা — Chap Khana home"><img className="brand-logo" src="/brand/chap-khana-logo.png" alt="চাপ খানা (Chap Khana) logo" width="192" height="64"/></Link>
@@ -37,6 +37,7 @@ export default function Layout({children}:{children:ReactNode}) {
       </div>
       <div className="md:col-span-3 border-t border-white/10 pt-7 mt-1"><div className="max-w-xl rounded-xl bg-[#fff8f0] text-[#35261d] p-5 sm:p-6"><RestaurantHours compact/>{settings.hours_note&&<p className="text-xs mt-3 text-[#75665a]">{settings.hours_note}</p>}</div></div>
     </div><div className="site-wrap border-t border-white/10 py-5 text-[#947e70] text-xs flex flex-wrap justify-between gap-3"><span>© {new Date().getFullYear()} Chap Khana website concept.</span><span>Pay cash at pickup/delivery · No online payment processed</span></div></footer>
+    {count>0 && (pathname==='/'||pathname==='/menu') &&<Link to="/cart" className="mobile-cart-bar" aria-label={`View cart, ${count} items`}><span className="inline-flex items-center gap-2"><ShoppingBag size={20}/> {t.cart} <span className="mobile-cart-count">{count}</span></span><span className="inline-flex items-center gap-2">৳{subtotal.toLocaleString('en-BD')} <ArrowRight size={18}/></span></Link>}
     {alert&&<div className="toast" role="status">{alert}</div>}
   </div>;
 }

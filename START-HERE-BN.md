@@ -107,3 +107,7 @@ Admin → Orders-এ Search, Date/Status Filters, 15-per-page navigation, Order 
 ## v3.9: Admin photo upload
 
 Admin → Menu → Edit dish → Dish photo → file choose → preview → Save dish। Supabase Storage-এ upload activate করতে `supabase/migrations/10_menu_image_storage.sql` আলাদা করে run করতে হবে। অফিস থেকে code deploy করতে পারবে, তবে migration না চালানো পর্যন্ত live uploads কাজ করবে না। বিস্তারিত `docs/PHASE3-MENU-PHOTO-UPLOAD-v3.9-BN.md`।
+
+
+### v3.10.0
+Mobile cart CTA, Load More menu, SEO metadata এবং vendor chunk optimization যুক্ত হয়েছে। নতুন SQL দরকার নেই। বিস্তারিত `docs/PHASE3-PERFORMANCE-SEO-v3.10-BN.md`।

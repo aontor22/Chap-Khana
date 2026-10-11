@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track
+Disallow: /auth/
+Sitemap: https://chap-khana.vercel.app/sitemap.xml
