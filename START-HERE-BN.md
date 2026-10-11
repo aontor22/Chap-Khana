@@ -122,3 +122,7 @@ Checkout successful হলে `/order-confirmation` page দেখাবে; এ
 ### v3.13.0 Coupons
 
 আগের `01`–`11` migrations শেষ হলে Supabase SQL Editor-এ `supabase/migrations/12_coupon_campaigns.sql` run করো। এরপর Admin → **Coupons** থেকে code এবং offer configure করো। `docs/PHASE4-COUPONS-v3.13-BN.md`-তে test checklist আছে। Customer loyalty points এখনও implement করা হয়নি।
+
+
+## v3.14 Loyalty Update
+Supabase-এর 01–12 migration আগে থাকতে হবে। `supabase/migrations/13_customer_loyalty.sql` staging-এ পরীক্ষা করে production-এ run করবে। Rewards প্রথমে OFF থাকবে। Admin → Rewards থেকে ON করবে। Google-login customer My Account-এ balance দেখবে এবং Checkout-এ points ব্যবহার করতে পারবে।

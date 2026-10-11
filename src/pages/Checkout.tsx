@@ -1,8 +1,9 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CreditCard, MapPin, ShoppingBag, Truck } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
-import { placeOrder, quoteCoupon } from '../data/api';
+import { placeOrder, quoteCoupon, getLoyaltySnapshot } from '../data/api';
+import { maxRedeemablePoints, redemptionPreview, type LoyaltySnapshot } from '../lib/loyalty';
 import { normalizeCouponCode, type CouponQuote } from '../lib/coupons';
 import { money, validateCheckout, waitError } from '../lib/utils';
 import { discountedUnitPrice, unitSavings } from '../lib/discount';
@@ -17,6 +18,12 @@ export default function Checkout(){
   const [busy,setBusy]=useState(false);const [issue,setIssue]=useState('');
   const [couponInput,setCouponInput]=useState('');const [quote,setQuote]=useState<CouponQuote|null>(null);const [couponBusy,setCouponBusy]=useState(false);const [couponError,setCouponError]=useState('');
   const [quoteCartSignature,setQuoteCartSignature]=useState('');
+  const [loyalty,setLoyalty]=useState<LoyaltySnapshot|null>(null);
+  const [loyaltyError,setLoyaltyError]=useState('');
+  const [redeemPoints,setRedeemPoints]=useState(0);
+  useEffect(()=>{if(!live||!user){setLoyalty(null);setRedeemPoints(0);return;}let active=true;setLoyalty(null);setRedeemPoints(0);setLoyaltyError('');
+    void getLoyaltySnapshot(user.id).then(data=>{if(active)setLoyalty(data);}).catch(e=>{if(active)setLoyaltyError(waitError(e));});
+    return()=>{active=false;};},[user?.id,live]);
   if(!count) return <Navigate to="/cart" replace/>;
   const deliveryFee=info.type==='delivery'?settings.delivery_fee:0;const savings=menu.reduce((sum,item)=>sum+unitSavings(item)*(cart[item.id]||0),0);
   const update=(key:keyof CheckoutInfo,val:string)=>{if(key==='type')setQuote(null);setInfo(prev=>({...prev,[key]:val}));};
@@ -25,12 +32,17 @@ export default function Checkout(){
     catch(e){setCouponError(waitError(e));}finally{setCouponBusy(false);} };
   const cartSignature=JSON.stringify(cart);
   const approvedQuote=quote&&quoteCartSignature===cartSignature&&quote.subtotal===subtotal?quote:null;
+  const eligibleSubtotal=subtotal-(approvedQuote?.discount??0);
+  const maxPoints=loyalty?maxRedeemablePoints(loyalty.account.balance,eligibleSubtotal,loyalty.settings):0;
+  const approvedPoints=redeemPoints>0&&redeemPoints<=maxPoints&&redeemPoints>=(loyalty?.settings.minimum_redeem_points??Infinity)?redeemPoints:0;
+  const rewardDiscount=approvedPoints&&loyalty?redemptionPreview(approvedPoints,loyalty.settings):0;
   const onSubmit=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();if(busy)return;
     if(couponInput.trim()&&!approvedQuote){setIssue('Apply your coupon or clear the code before checkout.');return;}
+    if(redeemPoints>0&&approvedPoints!==redeemPoints){setIssue('Your rewards balance or order has changed. Check your points and try again.');return;}
     const error=validateCheckout(info,cart,menu,settings);
     if(error){setIssue(error);return;}setIssue('');setBusy(true);
-    try {const order=await placeOrder(info,cart,menu,settings,requestId.current,approvedQuote?.code);const saved=saveReceipt(order,info.type,menu.filter(item=>cart[item.id]>0).map(item=>({name:item.name,qty:cart[item.id]})));clearCart();navigate('/order-confirmation',{replace:true,state:{receipt:saved}});}
+    try {const order=await placeOrder(info,cart,menu,settings,requestId.current,approvedQuote?.code,approvedPoints);const saved=saveReceipt(order,info.type,menu.filter(item=>cart[item.id]>0).map(item=>({name:item.name,qty:cart[item.id]})));clearCart();navigate('/order-confirmation',{replace:true,state:{receipt:saved}});}
     catch(e){setIssue(waitError(e));} finally{setBusy(false);}
   };
   return <section className="site-wrap page-pad"><Link to="/cart" className="back-link"><ArrowLeft size={16}/>{t.bag}</Link><div className="section-kicker"><span/> ALMOST THERE</div><h1 className="page-title mb-10">{t.checkout}<span className="text-ember">.</span></h1>
@@ -51,8 +63,18 @@ export default function Checkout(){
     {couponError&&<p role="alert" className="text-red-700 text-sm">{couponError}</p>}
     {!live&&<p className="text-xs text-[#93776b]">Demo coupon: DEMO10. Live campaigns must be created by staff.</p>}
   </div>
+  {live&&user&&<div className="border-t border-[#ead6c6] pt-4 mt-4 space-y-2" data-testid="checkout-loyalty">
+    <h3 className="font-bold">Chap Khana Rewards</h3>
+    {loyaltyError?<p role="alert" className="text-sm text-[#a34132]">{loyaltyError.includes('loyalty_')?'Rewards setup is pending (SQL 13).':loyaltyError}</p>:!loyalty?<p className="text-sm text-[#84746b]">Checking reward points…</p>:<>
+      <p className="text-sm text-[#7d6d64]">{loyalty.account.balance} points available · {loyalty.settings.bdt_per_point} taka discount/point</p>
+      {!loyalty.settings.enabled?<p className="text-xs">Rewards are currently paused.</p>:maxPoints===0?<p className="text-xs">Earn more points by completing orders. Minimum redemption: {loyalty.settings.minimum_redeem_points} points.</p>:
+      <label className="field">Redeem points (max {maxPoints})<input type="number" min="0" max={maxPoints} step="1" value={redeemPoints} onChange={e=>setRedeemPoints(Number(e.target.value)||0)} disabled={busy} aria-label="Redeem loyalty points"/></label>}
+      <p className="text-xs text-[#937b6f]">Points are reserved only after order placement and refunded if the order is cancelled. New points are earned only after completion.</p>
+    </>}
+  </div>}
   {approvedQuote&&<div className="summary-line text-green-700"><span>Coupon savings</span><strong>−{money(approvedQuote.discount)}</strong></div>}
-  <div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee-(approvedQuote?.discount??0))}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices, coupon limits and delivery fees are recomputed in Postgres. Coupon previews may change before order submission.</p></aside>
+  {rewardDiscount>0&&<div className="summary-line text-green-700"><span>Rewards savings ({approvedPoints} points)</span><strong>−{money(rewardDiscount)}</strong></div>}
+  <div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee-(approvedQuote?.discount??0)-rewardDiscount)}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices, coupons, point balances and delivery fees are recomputed in Postgres. Coupon previews may change before order submission.</p></aside>
     </form>
   </section>;
 }

@@ -29,6 +29,7 @@ export default function OrderConfirmation(){
         <div className="summary-line"><span>{locale==='bn'?'তারিখ':'Placed at'}</span><strong>{new Date(receipt.savedAt).toLocaleString(locale==='bn'?'bn-BD':'en-BD',{timeZone:'Asia/Dhaka'})}</strong></div>
         {receipt.lines.length>0&&<div className="border-t border-[#e0d0c0] mt-3 pt-4"><p className="font-bold mb-2">{t.review}</p>{receipt.lines.map((line,index)=><div className="summary-line" key={`${line.name}-${index}`}><span>{line.name}</span><strong>×{line.qty}</strong></div>)}</div>}
         {Boolean(receipt.coupon_discount)&&<div className="summary-line text-green-800"><span>Coupon {receipt.coupon_code}</span><strong>−{money(receipt.coupon_discount??0)}</strong></div>}
+        {Boolean(receipt.loyalty_discount)&&<div className="summary-line text-green-800"><span>Rewards · {receipt.loyalty_points_redeemed} points</span><strong>−{money(receipt.loyalty_discount??0)}</strong></div>}
         <div className="summary-line total-line"><span>{t.total}</span><strong>{money(receipt.total)}</strong></div>
         <p className="text-xs text-[#897568] mt-3"><ShieldCheck size={13} className="inline mr-1"/>{locale==='bn'?'ট্র্যাকিং লিংকটি ব্যক্তিগত; অন্যদের সঙ্গে শেয়ার করবেন না।':'Your tracking link is private. Do not post it publicly.'}</p>
       </div>

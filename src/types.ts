@@ -24,7 +24,7 @@ export interface Order {
   customer_phone: string; fulfillment_type: Fulfillment; delivery_address: string; notes: string; status: OrderStatus;
   subtotal: number; delivery_fee: number; total: number; coupon_code?: string|null; coupon_discount?: number; created_at: string; updated_at?: string; order_items?: OrderItem[];
 }
-export interface OrderReceipt { code: string; tracking_token: string; total: number; demo?: boolean; coupon_code?: string|null; coupon_discount?: number }
+export interface OrderReceipt { code: string; tracking_token: string; total: number; demo?: boolean; coupon_code?: string|null; coupon_discount?: number; loyalty_points_redeemed?:number; loyalty_discount?:number }
 export interface TrackingResult { code: string; status: OrderStatus; total: number; fulfillment_type: Fulfillment; created_at: string }
 export interface CheckoutInfo { name: string; phone: string; type: Fulfillment; address: string; notes: string }
 export type Cart = Record<string, number>;

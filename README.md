@@ -185,3 +185,7 @@ After a successful checkout, the customer is redirected to `/order-confirmation`
 ### v3.13 Coupon campaigns
 
 Coupon promotion setup and security verification: `docs/PHASE4-COUPONS-v3.13-BN.md`. SQL `12_coupon_campaigns.sql` is required before enabling live coupon use. The existing non-coupon checkout continues to use `place_order_v2`. Customer loyalty points are not part of this update.
+
+
+## v3.14 Rewards program
+Customer points are earned on completed signed-in orders; redemption happens server-side through a locked wallet and a dedicated `place_order_v4` RPC. After applying earlier migrations through 12, apply `supabase/migrations/13_customer_loyalty.sql` in staging then production. Program is **OFF** initially. Admin → Rewards configures rules; My Account displays customer balance. See `docs/PHASE4-LOYALTY-v3.14-BN.md`.

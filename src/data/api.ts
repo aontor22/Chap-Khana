@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
 import { type CouponCampaign, type CouponQuote, DEFAULT_DEMO_COUPONS, normalizeCouponCode, isCouponCode, localCouponQuote, validateCouponCampaign } from '../lib/coupons';
@@ -20,14 +21,15 @@ export const getSettings = async (): Promise<StoreSettings> => {
   const {data,error}=await db().from('store_settings').select('*').eq('id',1).single(); fail(error);
   return normalizeStoreSettings(data as Partial<StoreSettings>);
 };
-export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[], settings: StoreSettings, requestId: string, couponCode?: string): Promise<OrderReceipt> => {
+export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[], settings: StoreSettings, requestId: string, couponCode?: string, redeemPoints=0): Promise<OrderReceipt> => {
   const items=Object.entries(cart).filter(([,qty])=>qty>0).map(([id,qty])=>({id,qty}));
   if (supabase) {
     const args={p_request_id:requestId,p_name:info.name.trim(),p_phone:info.phone.replace(/[\s-]/g,''),p_type:info.type,p_address:info.address.trim(),p_notes:info.notes.trim(),p_items:items};
-    const {data,error}=couponCode?await db().rpc('place_order_v3',{...args,p_coupon:normalizeCouponCode(couponCode)}):await db().rpc('place_order_v2',args);
+    const {data,error}=redeemPoints>0?await db().rpc('place_order_v4',{...args,p_coupon:couponCode?normalizeCouponCode(couponCode):null,p_redeem_points:redeemPoints}):couponCode?await db().rpc('place_order_v3',{...args,p_coupon:normalizeCouponCode(couponCode)}):await db().rpc('place_order_v2',args);
     fail(error); if (!data || typeof data !== 'object' || !('tracking_token' in data)) throw new Error('Order acknowledgement was not received. Contact the restaurant before trying again.');
     return data as unknown as OrderReceipt;
   }
+  if(redeemPoints>0)throw new Error('Loyalty redemption requires a live signed-in account.');
   if(!items.length)throw new Error('Choose at least one available item.');
   for(const line of items){const item=menu.find(x=>x.id===line.id);if(!item?.active||!item.available||!Number.isInteger(item.price)||!item.price||item.price<1)throw new Error('Cart contains a dish with an unconfirmed price. Refresh and try again.');}
   const stamp=new Date().toISOString();const code='DEMO-'+crypto.randomUUID().slice(0,8).toUpperCase();const token=crypto.randomUUID();
@@ -137,4 +139,33 @@ export const quoteCoupon=async(code:string,cart:Cart,menu:MenuItem[],type:Checko
   const quote=data as unknown as CouponQuote;
   if(!quote||quote.code!==normalized||!Number.isSafeInteger(quote.discount)||quote.discount<1)throw new Error('Could not validate the coupon.');
   return quote;
+};
+
+// Wallet data is read-only for customers. Only private SECURITY DEFINER functions
+// can reserve, credit or refund points; no browser-side wallet writes exist.
+export const getLoyaltySnapshot=async(userId:string):Promise<LoyaltySnapshot>=>{
+  if(!supabase)return {settings:DEFAULT_LOYALTY_SETTINGS,account:EMPTY_LOYALTY_ACCOUNT,events:[]};
+  const [settings,wallet,events]=await Promise.all([
+    db().from('loyalty_settings').select('*').eq('id',1).single(),
+    db().from('loyalty_accounts').select('balance,lifetime_earned,lifetime_redeemed').eq('user_id',userId).maybeSingle(),
+    db().from('loyalty_events').select('id,kind,points,created_at,order_id').eq('user_id',userId).order('created_at',{ascending:false}).limit(15)
+  ]);
+  fail(settings.error);fail(wallet.error);fail(events.error);
+  return {settings:settings.data as LoyaltySettings,account:wallet.data??EMPTY_LOYALTY_ACCOUNT,
+    events:(events.data||[]) as LoyaltySnapshot['events']};
+};
+export const getLoyaltySettings=async():Promise<LoyaltySettings>=>{
+  if(!supabase)return fromStorage('ckr_demo_loyalty_rules',DEFAULT_LOYALTY_SETTINGS);
+  const {data,error}=await db().from('loyalty_settings').select('*').eq('id',1).single();fail(error);
+  return data as LoyaltySettings;
+};
+export const saveLoyaltySettings=async(settings:LoyaltySettings):Promise<void>=>{
+  const reason=validateLoyaltySettings(settings);if(reason)throw new Error(reason);
+  if(!supabase){saveStorage('ckr_demo_loyalty_rules',settings);return;}
+  const {data,error}=await db().from('loyalty_settings').update({
+    enabled:settings.enabled,points_per_100_bdt:settings.points_per_100_bdt,
+    bdt_per_point:settings.bdt_per_point,minimum_redeem_points:settings.minimum_redeem_points,
+    max_redeem_percent:settings.max_redeem_percent,updated_at:new Date().toISOString()
+  }).eq('id',1).select('id').single();fail(error);
+  if(!data)throw new Error('Rewards settings could not be saved.');
 };

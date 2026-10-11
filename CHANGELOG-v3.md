@@ -118,3 +118,10 @@
 - Added server-quoted cart coupon input and transactional checkout through `place_order_v3` only when a coupon is used.
 - Captures coupon discount snapshots on new orders and includes them in receipts, kitchen tickets and completed-order aggregate reports.
 - Migration `12_coupon_campaigns.sql` required for live coupons. **Loyalty points remain out of scope for this phase.**
+
+## v3.14.0 — Customer Loyalty Points
+- Rewards panel in My Account shows balance, lifetime totals, and recent events.
+- Admin Rewards tab configures earning rates and redemption caps (disabled by default).
+- Optional authenticated checkout point redemption with PostgreSQL-computed discount and strict wallet locks.
+- Database migration 13 credits signed-in customers on completed orders; refunds reserved points for cancelled orders without double-crediting retries.
+- Existing item discounts, coupons, guest checkout, menu and orders remain supported. Existing orders are NOT backfilled.
