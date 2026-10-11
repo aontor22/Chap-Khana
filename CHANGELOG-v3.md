@@ -66,3 +66,10 @@
 - Restored status-only order update privilege and included transactional permission assertions.
 - Added database ACL regression tests, CI `npm ci`, and production dependency audit.
 - No customer data, menu prices, discounts, order history or branding changed.
+
+
+## v3.7.0 — Phase 2 order notifications
+- Supabase Realtime `orders` inserts/updates trigger admin order refresh (requires optional SQL 09).
+- Added in-app new-order alerts, unread order indicator and click-to-enable chime.
+- Kept 20s polling backup; reset alerts and subscriptions on staff logout.
+- Added cursor, subscription and migration safety tests.

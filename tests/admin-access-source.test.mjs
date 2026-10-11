@@ -28,5 +28,5 @@ test('staff dashboard reuses the same allowlist check and handles errors',()=>{
   assert.match(admin,/permitted=adminStatus==='allowed'/);
   assert.doesNotMatch(admin,/(?:await |\b)isStaff\(user/);
   assert.match(admin,/adminStatus==='error'/);
-  assert.match(admin,/setOrders\(\[\]\)/);
+  assert.match(read('../src/hooks/useAdminOrderAlerts.ts'),/setOrders\(\[\]\)/);
 });

@@ -158,3 +158,8 @@ After migration `supabase/migrations/07_restaurant_profile_hours.sql`, Admin →
 
 ### v3.6 Phase 1 security update
 If you already applied migrations 01–07, run `supabase/migrations/08_launch_security.sql` in Supabase SQL Editor **before** deploying. This prevents the legacy RPC from bypassing v2 checkout protections and fixes admin weekly-hours validation permissions. Refer to [Phase 1 security guide](docs/SECURITY-PHASE1-v3.6-BN.md) for read-only verification SQL and staging tests. The codebase is not independently tested against your live Supabase project.
+
+
+## v3.7 order notifications
+
+Admin dashboard now supports new-order alerts, unread counts and click-to-enable sound, with 20-second polling backup. Apply `supabase/migrations/09_admin_order_realtime.sql` **after** pending migration 08 when you can access the database. See `docs/PHASE2-ORDER-NOTIFICATIONS-BN.md`.

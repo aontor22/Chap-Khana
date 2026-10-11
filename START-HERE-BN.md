@@ -95,3 +95,8 @@ Existing database-এ আগের 01, 03, 04, 05, 06 successful থাকলে
 
 ## v3.6.0 Security Update (Phase 1)
 আগের 01–07 SQL সফলভাবে run করে থাকলে Supabase SQL Editor-এ **শুধু** `supabase/migrations/08_launch_security.sql` run করো। এতে পুরোনো unsafe checkout RPC-এর public access বন্ধ এবং Admin Settings-এর weekly-hours validator permission ঠিক হবে। বিস্তারিত: `docs/SECURITY-PHASE1-v3.6-BN.md`। Live database-এ চালানোর আগে staging-এ পরীক্ষা ও backup রাখবে।
+
+
+## v3.7: নতুন Order Alert
+
+Admin Dashboard-এ নতুন order alert, unread counter ও `Enable sound` button যুক্ত হয়েছে। SQL 09 এখনই run না করতে পারলে সমস্যা নেই: আগের মতো ২০ সেকেন্ড অন্তর polling চলবে। পরে প্রথমে pending SQL 08, তারপর `supabase/migrations/09_admin_order_realtime.sql` চালাবে। সম্পূর্ণ guide: `docs/PHASE2-ORDER-NOTIFICATIONS-BN.md`।
