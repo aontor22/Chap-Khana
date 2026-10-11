@@ -111,3 +111,6 @@ Admin → Menu → Edit dish → Dish photo → file choose → preview → Save
 
 ### v3.10.0
 Mobile cart CTA, Load More menu, SEO metadata এবং vendor chunk optimization যুক্ত হয়েছে। নতুন SQL দরকার নেই। বিস্তারিত `docs/PHASE3-PERFORMANCE-SEO-v3.10-BN.md`।
+
+## v3.11 Customer receipt ও tracking
+Checkout successful হলে `/order-confirmation` page দেখাবে; একই tab-এ refresh করলেও ২৪ ঘণ্টার মধ্যে receipt পাওয়া যাবে। Tracking page-এ status progress দেখা যাবে ও প্রতি ৩০ সেকেন্ডে visible-tab refresh হবে। নতুন SQL নেই। বিস্তারিত `docs/PHASE3-CUSTOMER-TRACKING-v3.11-BN.md`।

@@ -10,7 +10,7 @@ export function seoForPath(path: string): PageSeo {
     canonicalPath: '/'
   };
   const sections: Record<string, string> = {
-    '/cart':'Your Cart', '/checkout':'Checkout', '/account':'Your Account',
+    '/cart':'Your Cart', '/checkout':'Checkout', '/order-confirmation':'Order Confirmation', '/account':'Your Account',
     '/track':'Order Tracking', '/admin':'Staff Dashboard', '/auth/callback':'Signing In'
   };
   return {

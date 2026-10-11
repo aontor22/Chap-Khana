@@ -95,3 +95,10 @@
 - Route-specific SEO and private-route noindex headers; sitemap/robots, improved photo layout stability.
 - Cache-friendly vendor splitting in Vite; preserves v3.9 admin photo management.
 - No database schema changes.
+
+## v3.11.0 — Customer confirmation and tracking experience
+- Add a dedicated `/order-confirmation` page with order number, confirmed server total, fulfillment type, requested items, print/copy and direct tracking link.
+- Keep only a time-limited private receipt in `sessionStorage` (24 hours, this browser tab), never store phone or delivery address with it. Route state supports storage-blocked browsers during navigation.
+- Improve `/track` with pickup/delivery-specific progress, cancellation messaging, bilingual status help, foreground-only 30-second refresh and a manual refresh button.
+- Set `Referrer-Policy: no-referrer` and noindex the new private confirmation route.
+- No database migration; existing `place_order_v2` and `track_order` RPC contracts unchanged.

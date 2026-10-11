@@ -183,3 +183,13 @@
   .toast {bottom:calc(82px + env(safe-area-inset-bottom,0px));}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.group:hover .dish-image img{transform:none}}
+
+/* v3.11: private customer receipt is printable independently of staff kitchen tickets. */
+@media print {
+  body:has(.receipt-customer) * {visibility:hidden !important;}
+  body:has(.receipt-customer) .receipt-customer,
+  body:has(.receipt-customer) .receipt-customer * {visibility:visible !important;}
+  body:has(.receipt-customer) .receipt-customer {position:absolute !important;top:0;left:0;width:100%;padding:12mm !important;box-shadow:none !important;border:0 !important;background:white !important;color:black !important;}
+  body:has(.receipt-customer) .receipt-customer .no-print {display:none !important;}
+  body:has(.receipt-customer) .receipt-customer .receipt-summary {background:white !important;}
+}

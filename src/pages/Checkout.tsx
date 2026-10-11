@@ -1,30 +1,29 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BadgeCheck, ClipboardCopy, CreditCard, MapPin, ShoppingBag, Truck } from 'lucide-react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, CreditCard, MapPin, ShoppingBag, Truck } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { placeOrder } from '../data/api';
 import { money, validateCheckout, waitError } from '../lib/utils';
 import { discountedUnitPrice, unitSavings } from '../lib/discount';
-import type { CheckoutInfo, OrderReceipt } from '../types';
+import type { CheckoutInfo } from '../types';
+import { saveReceipt } from '../lib/orderReceipt';
 
 export default function Checkout(){
-  const {t,cart,menu,settings,subtotal,count,user,clearCart,notify,live}=useShop();
+  const {t,cart,menu,settings,subtotal,count,user,clearCart,live}=useShop();
+  const navigate=useNavigate();
   const [info,setInfo]=useState<CheckoutInfo>({name:user?.user_metadata?.full_name||'',phone:'',type:settings.pickup_enabled?'pickup':'delivery',address:'',notes:''});
   const requestId=useRef(crypto.randomUUID());
-  const [busy,setBusy]=useState(false);const [issue,setIssue]=useState('');const [result,setResult]=useState<OrderReceipt|null>(null);
-  if(!count&&!result) return <Navigate to="/cart" replace/>;
+  const [busy,setBusy]=useState(false);const [issue,setIssue]=useState('');
+  if(!count) return <Navigate to="/cart" replace/>;
   const deliveryFee=info.type==='delivery'?settings.delivery_fee:0;const savings=menu.reduce((sum,item)=>sum+unitSavings(item)*(cart[item.id]||0),0);
   const update=(key:keyof CheckoutInfo,val:string)=>setInfo(prev=>({...prev,[key]:val}));
   const onSubmit=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();if(busy)return;
     const error=validateCheckout(info,cart,menu,settings);
     if(error){setIssue(error);return;}setIssue('');setBusy(true);
-    try {const order=await placeOrder(info,cart,menu,settings,requestId.current);setResult(order);clearCart();window.scrollTo({top:0,behavior:'smooth'});}
+    try {const order=await placeOrder(info,cart,menu,settings,requestId.current);const saved=saveReceipt(order,info.type,menu.filter(item=>cart[item.id]>0).map(item=>({name:item.name,qty:cart[item.id]})));clearCart();navigate('/order-confirmation',{replace:true,state:{receipt:saved}});}
     catch(e){setIssue(waitError(e));} finally{setBusy(false);}
   };
-  if(result){const trackUrl=`${location.origin}/track?token=${encodeURIComponent(result.tracking_token)}`;
-    return <div className="site-wrap page-pad"><div className="success-card"><span className="success-icon"><BadgeCheck size={40}/></span><div className="section-kicker justify-center">ORDER RECEIVED</div><h1 className="page-title mt-3">{t.success}</h1><p className="mt-3 text-[#776960] max-w-lg mx-auto">{result.demo?t.demoSuccess:t.liveSuccess}</p><div className="receipt-summary"><div className="summary-line"><span>Order reference</span><strong>{result.code}</strong></div><div className="summary-line"><span>{t.total}</span><strong>{money(result.total)}</strong></div><div className="text-xs break-all text-[#86786e] mt-4">Tracking: {result.tracking_token}</div></div><div className="flex flex-wrap justify-center gap-3 mt-8"><button className="btn-primary" onClick={()=>{void navigator.clipboard.writeText(trackUrl).then(()=>notify('Tracking link copied'));}}><ClipboardCopy size={18}/>{t.copy}</button><Link to={`/track?token=${encodeURIComponent(result.tracking_token)}`} className="btn-secondary">{t.trackNow}<ArrowRight size={18}/></Link></div></div></div>;
-  }
   return <section className="site-wrap page-pad"><Link to="/cart" className="back-link"><ArrowLeft size={16}/>{t.bag}</Link><div className="section-kicker"><span/> ALMOST THERE</div><h1 className="page-title mb-10">{t.checkout}<span className="text-ember">.</span></h1>
     <form onSubmit={e=>void onSubmit(e)} className="grid lg:grid-cols-[1.35fr_.8fr] gap-8 items-start">
       <div className="panel p-6 sm:p-9"><h2 className="form-heading"><Truck size={22}/>{t.type}</h2><div className="grid sm:grid-cols-2 gap-3 mb-9">{settings.pickup_enabled&&<button type="button" onClick={()=>update('type','pickup')} className={`method-card ${info.type==='pickup'?'method-selected':''}`}><ShoppingBag size={25}/><strong>{t.pickup}</strong><span>Collect at the restaurant</span></button>}{settings.delivery_enabled&&<button type="button" onClick={()=>update('type','delivery')} className={`method-card ${info.type==='delivery'?'method-selected':''}`}><MapPin size={25}/><strong>{t.delivery}</strong><span>{money(settings.delivery_fee)} delivery fee</span></button>}</div>

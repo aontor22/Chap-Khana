@@ -173,3 +173,7 @@ Authorized admins can upload/preview/replace dish photos in **Admin → Menu →
 
 ### v3.10 mobile/SEO update
 See `docs/PHASE3-PERFORMANCE-SEO-v3.10-BN.md`. No new SQL is required for v3.10 itself.
+
+## v3.11 Customer confirmation and order journey
+
+After a successful checkout, the customer is redirected to `/order-confirmation` where the official returned total and private tracking link appear. The receipt is tab-scoped for 24 hours and excludes customer PII. `/track` shows a localized step-by-step status journey and foreground-only polling. No new Supabase migration. See `docs/PHASE3-CUSTOMER-TRACKING-v3.11-BN.md`.
