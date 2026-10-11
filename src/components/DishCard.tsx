@@ -7,6 +7,8 @@ import type { MenuItem } from '../types';
 // The menu catalog provides illustrative reference photos when a Supabase row or an
 // old browser-local demo menu has an empty image_url. Owner-uploaded photos always win.
 import { referenceImageFor } from '../data/referenceImages';
+import { managedMenuImagePath } from '../lib/menuImageRules';
+import { config } from '../lib/config';
 
 const foodIcons: Record<string, string> = {
   chap: '🍗', beef: '🍖', grill: '🍢', naan: '🫓', rice: '🍛', salad: '🥗',
@@ -15,18 +17,24 @@ const foodIcons: Record<string, string> = {
 };
 
 export function DishImage({item,large=false}:{item:MenuItem;large?:boolean}) {
-  const [failedUrl, setFailedUrl] = useState('');
-  const url = validImage(item.image_url) ? item.image_url : referenceImageFor(item.id);
-  const showImage = Boolean(url && failedUrl !== url);
+  const [failedUrls, setFailedUrls] = useState<string[]>([]);
+  const preferredUrl = validImage(item.image_url) ? item.image_url : '';
+  const referenceUrl = referenceImageFor(item.id);
+  // If an owner-uploaded photo becomes unavailable, use the catalog reference
+  // before falling back to a category illustration. Avoid retry loops.
+  const url = preferredUrl && !failedUrls.includes(preferredUrl) ? preferredUrl :
+    referenceUrl && !failedUrls.includes(referenceUrl) ? referenceUrl : '';
+  const showImage = Boolean(url);
+  const ownPhoto = Boolean(url===preferredUrl && managedMenuImagePath(url,item.id,config.supabaseUrl));
 
   return <div className={`dish-image ${large ? 'h-full' : ''}`}>
-    {showImage ? <img key={url} src={url} alt={`Reference food photograph representing ${item.name}`} loading="lazy" decoding="async" onError={() => setFailedUrl(url)} /> :
+    {showImage ? <img key={url} src={url} alt={ownPhoto?`Restaurant photo of ${item.name}`:`Illustrative reference photo for ${item.name}`} loading="lazy" decoding="async" onError={() => setFailedUrls(previous => previous.includes(url)?previous:[...previous,url])} /> :
       <div className={`dish-fallback dish-fallback-${item.category}`}>
         <span className="dish-fallback-symbol" aria-hidden="true">{foodIcons[item.category] || '🍽️'}</span>
         <span className="dish-fallback-title">{item.name_bn || item.name}</span>
         <small>IMAGE UNAVAILABLE</small>
       </div>}
-    {!large && <span className="dish-image-reference">ILLUSTRATIVE PHOTO</span>}
+    {!large && <span className="dish-image-reference">{ownPhoto?'RESTAURANT PHOTO':'ILLUSTRATIVE PHOTO'}</span>}
   </div>;
 }
 export default function DishCard({item}:{item:MenuItem}) {

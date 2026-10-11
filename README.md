@@ -166,3 +166,7 @@ Admin dashboard now supports new-order alerts, unread counts and click-to-enable
 
 ### Admin Orders v3.8
 Open `/admin` → **Orders**. Use server-side search (order code, customer name, or phone), status/date filters, pages of 15 orders, and **View details / print** for a single kitchen ticket. The date range is interpreted in Asia/Dhaka regardless of the device timezone. No new SQL migration is needed for v3.8; existing staff-only Supabase RLS applies. Review `docs/PHASE2-ADVANCED-ORDERS-v3.8-BN.md` before deploying.
+
+## v3.9 — Admin Menu Photo Uploads
+
+Authorized admins can upload/preview/replace dish photos in **Admin → Menu → Edit**. Client-side JPEG/PNG/WebP optimization exports WebP before a restricted Supabase Storage upload. The existing image URL is updated only after Storage confirms an upload. See `docs/PHASE3-MENU-PHOTO-UPLOAD-v3.9-BN.md` for the mandatory `10_menu_image_storage.sql` migration, RLS verification and deploy steps.

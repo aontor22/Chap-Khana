@@ -103,3 +103,7 @@ Admin Dashboard-এ নতুন order alert, unread counter ও `Enable sound` 
 
 ### v3.8.0 — Advanced Order Management
 Admin → Orders-এ Search, Date/Status Filters, 15-per-page navigation, Order Details এবং Print Kitchen Ticket যোগ হয়েছে। **v3.8-এর জন্য কোনো নতুন SQL migration লাগবে না।** আগের pending 08 ও 09 migration পরে করতে পারবে। বিস্তারিত `docs/PHASE2-ADVANCED-ORDERS-v3.8-BN.md` দেখো।
+
+## v3.9: Admin photo upload
+
+Admin → Menu → Edit dish → Dish photo → file choose → preview → Save dish। Supabase Storage-এ upload activate করতে `supabase/migrations/10_menu_image_storage.sql` আলাদা করে run করতে হবে। অফিস থেকে code deploy করতে পারবে, তবে migration না চালানো পর্যন্ত live uploads কাজ করবে না। বিস্তারিত `docs/PHASE3-MENU-PHOTO-UPLOAD-v3.9-BN.md`।

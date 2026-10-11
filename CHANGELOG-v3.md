@@ -81,3 +81,11 @@
 - Added detailed order modal and printer-friendly kitchen ticket with original order line snapshots.
 - Kept v3.7 Realtime notifications and 20-second polling fallback intact.
 - No new database schema or migration required for this release.
+
+
+## v3.9.0 — Admin Photo Uploads
+- Authorized staff can upload JPEG/PNG/WebP photos, preview selections, replace or revert to reference pictures.
+- Client processes image into optimized WebP; new Storage SQL 10 applies 3 MB limit and admin-only RLS writes/deletes.
+- Uploaded photos are public-readable; sensitive files must not be uploaded.
+- Replaces old managed files only after successful menu save, with best-effort cleanup. Other photo URLs never deleted.
+- No order/menu schema changes; migrations 08/09 remain independent dependencies.
