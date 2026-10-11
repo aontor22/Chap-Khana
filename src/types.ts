@@ -22,9 +22,9 @@ export interface OrderItem { id?: number; order_id?: string; menu_item_id?: stri
 export interface Order {
   id: string; code: string; tracking_token: string; customer_user_id?: string | null; customer_name: string;
   customer_phone: string; fulfillment_type: Fulfillment; delivery_address: string; notes: string; status: OrderStatus;
-  subtotal: number; delivery_fee: number; total: number; created_at: string; updated_at?: string; order_items?: OrderItem[];
+  subtotal: number; delivery_fee: number; total: number; coupon_code?: string|null; coupon_discount?: number; created_at: string; updated_at?: string; order_items?: OrderItem[];
 }
-export interface OrderReceipt { code: string; tracking_token: string; total: number; demo?: boolean }
+export interface OrderReceipt { code: string; tracking_token: string; total: number; demo?: boolean; coupon_code?: string|null; coupon_discount?: number }
 export interface TrackingResult { code: string; status: OrderStatus; total: number; fulfillment_type: Fulfillment; created_at: string }
 export interface CheckoutInfo { name: string; phone: string; type: Fulfillment; address: string; notes: string }
 export type Cart = Record<string, number>;

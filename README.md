@@ -181,3 +181,7 @@ See `docs/PHASE3-PERFORMANCE-SEO-v3.10-BN.md`. No new SQL is required for v3.10 
 ## v3.11 Customer confirmation and order journey
 
 After a successful checkout, the customer is redirected to `/order-confirmation` where the official returned total and private tracking link appear. The receipt is tab-scoped for 24 hours and excludes customer PII. `/track` shows a localized step-by-step status journey and foreground-only polling. No new Supabase migration. See `docs/PHASE3-CUSTOMER-TRACKING-v3.11-BN.md`.
+
+### v3.13 Coupon campaigns
+
+Coupon promotion setup and security verification: `docs/PHASE4-COUPONS-v3.13-BN.md`. SQL `12_coupon_campaigns.sql` is required before enabling live coupon use. The existing non-coupon checkout continues to use `place_order_v2`. Customer loyalty points are not part of this update.

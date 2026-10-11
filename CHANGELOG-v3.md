@@ -112,3 +112,9 @@
 - Improve `/track` with pickup/delivery-specific progress, cancellation messaging, bilingual status help, foreground-only 30-second refresh and a manual refresh button.
 - Set `Referrer-Policy: no-referrer` and noindex the new private confirmation route.
 - No database migration; existing `place_order_v2` and `track_order` RPC contracts unchanged.
+
+## v3.13.0 — Promotional coupons
+- Added staff-only coupon campaigns, percentage/fixed offers, minimum spend, redemption limits and scheduling.
+- Added server-quoted cart coupon input and transactional checkout through `place_order_v3` only when a coupon is used.
+- Captures coupon discount snapshots on new orders and includes them in receipts, kitchen tickets and completed-order aggregate reports.
+- Migration `12_coupon_campaigns.sql` required for live coupons. **Loyalty points remain out of scope for this phase.**

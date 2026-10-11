@@ -2,7 +2,8 @@ import { useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CreditCard, MapPin, ShoppingBag, Truck } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
-import { placeOrder } from '../data/api';
+import { placeOrder, quoteCoupon } from '../data/api';
+import { normalizeCouponCode, type CouponQuote } from '../lib/coupons';
 import { money, validateCheckout, waitError } from '../lib/utils';
 import { discountedUnitPrice, unitSavings } from '../lib/discount';
 import type { CheckoutInfo } from '../types';
@@ -14,14 +15,22 @@ export default function Checkout(){
   const [info,setInfo]=useState<CheckoutInfo>({name:user?.user_metadata?.full_name||'',phone:'',type:settings.pickup_enabled?'pickup':'delivery',address:'',notes:''});
   const requestId=useRef(crypto.randomUUID());
   const [busy,setBusy]=useState(false);const [issue,setIssue]=useState('');
+  const [couponInput,setCouponInput]=useState('');const [quote,setQuote]=useState<CouponQuote|null>(null);const [couponBusy,setCouponBusy]=useState(false);const [couponError,setCouponError]=useState('');
+  const [quoteCartSignature,setQuoteCartSignature]=useState('');
   if(!count) return <Navigate to="/cart" replace/>;
   const deliveryFee=info.type==='delivery'?settings.delivery_fee:0;const savings=menu.reduce((sum,item)=>sum+unitSavings(item)*(cart[item.id]||0),0);
-  const update=(key:keyof CheckoutInfo,val:string)=>setInfo(prev=>({...prev,[key]:val}));
+  const update=(key:keyof CheckoutInfo,val:string)=>{if(key==='type')setQuote(null);setInfo(prev=>({...prev,[key]:val}));};
+  const applyCoupon=async()=>{setCouponBusy(true);setCouponError('');setQuote(null);
+    try{const value=await quoteCoupon(couponInput,cart,menu,info.type,deliveryFee);setQuote(value);setQuoteCartSignature(JSON.stringify(cart));}
+    catch(e){setCouponError(waitError(e));}finally{setCouponBusy(false);} };
+  const cartSignature=JSON.stringify(cart);
+  const approvedQuote=quote&&quoteCartSignature===cartSignature&&quote.subtotal===subtotal?quote:null;
   const onSubmit=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();if(busy)return;
+    if(couponInput.trim()&&!approvedQuote){setIssue('Apply your coupon or clear the code before checkout.');return;}
     const error=validateCheckout(info,cart,menu,settings);
     if(error){setIssue(error);return;}setIssue('');setBusy(true);
-    try {const order=await placeOrder(info,cart,menu,settings,requestId.current);const saved=saveReceipt(order,info.type,menu.filter(item=>cart[item.id]>0).map(item=>({name:item.name,qty:cart[item.id]})));clearCart();navigate('/order-confirmation',{replace:true,state:{receipt:saved}});}
+    try {const order=await placeOrder(info,cart,menu,settings,requestId.current,approvedQuote?.code);const saved=saveReceipt(order,info.type,menu.filter(item=>cart[item.id]>0).map(item=>({name:item.name,qty:cart[item.id]})));clearCart();navigate('/order-confirmation',{replace:true,state:{receipt:saved}});}
     catch(e){setIssue(waitError(e));} finally{setBusy(false);}
   };
   return <section className="site-wrap page-pad"><Link to="/cart" className="back-link"><ArrowLeft size={16}/>{t.bag}</Link><div className="section-kicker"><span/> ALMOST THERE</div><h1 className="page-title mb-10">{t.checkout}<span className="text-ember">.</span></h1>
@@ -36,7 +45,14 @@ export default function Checkout(){
         <button disabled={busy||!settings.accepting_orders} type="submit" className="btn-primary w-full justify-center mt-7">{busy?t.placing:live?t.place:t.demoPlace}<ArrowRight size={17}/></button>
         <p className="text-xs text-[#9c8b81] mt-4">{live?'Submitting creates a real order in the configured Supabase project.':'This is a local demo order only. No restaurant receives it.'}</p>
       </div>
-      <aside className="summary-card"><h2 className="text-xl font-bold mb-6">{t.review}</h2>{menu.filter(m=>cart[m.id]).map(m=><div className="summary-line" key={m.id}><span>{m.name} <small>× {cart[m.id]}</small></span><strong>{money((discountedUnitPrice(m)||0)*(cart[m.id]||0))}</strong></div>)}{savings>0&&<div className="summary-line text-green-700"><span>Discount savings</span><strong>−{money(savings)}</strong></div>}<div className="summary-line pt-6 border-t border-[#e9dfd5] mt-4"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><div className="summary-line"><span>{t.fee}</span><strong>{money(deliveryFee)}</strong></div><div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee)}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices and delivery fees are recomputed and verified in Postgres at submission.</p></aside>
+      <aside className="summary-card"><h2 className="text-xl font-bold mb-6">{t.review}</h2>{menu.filter(m=>cart[m.id]).map(m=><div className="summary-line" key={m.id}><span>{m.name} <small>× {cart[m.id]}</small></span><strong>{money((discountedUnitPrice(m)||0)*(cart[m.id]||0))}</strong></div>)}{savings>0&&<div className="summary-line text-green-700"><span>Item discount savings</span><strong>−{money(savings)}</strong></div>}<div className="summary-line pt-6 border-t border-[#e9dfd5] mt-4"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><div className="summary-line"><span>{t.fee}</span><strong>{money(deliveryFee)}</strong></div><div className="border-t border-[#ead6c6] pt-4 mt-4 space-y-2">
+    <label className="field">Coupon code (optional)<div className="flex gap-2"><input maxLength={24} autoComplete="off" value={couponInput} placeholder="WELCOME10" onChange={e=>{setCouponInput(normalizeCouponCode(e.target.value));setQuote(null);setCouponError('');}}/><button type="button" disabled={couponBusy||busy||!couponInput.trim()||!settings.accepting_orders} className="btn-secondary !py-2" onClick={()=>void applyCoupon()}>{couponBusy?'Checking…':'Apply'}</button></div></label>
+    {approvedQuote&&<div className="flex justify-between text-green-800 text-sm"><span>{approvedQuote.code} applied</span><button type="button" className="underline" onClick={()=>{setQuote(null);setCouponInput('');}}>Remove</button></div>}
+    {couponError&&<p role="alert" className="text-red-700 text-sm">{couponError}</p>}
+    {!live&&<p className="text-xs text-[#93776b]">Demo coupon: DEMO10. Live campaigns must be created by staff.</p>}
+  </div>
+  {approvedQuote&&<div className="summary-line text-green-700"><span>Coupon savings</span><strong>−{money(approvedQuote.discount)}</strong></div>}
+  <div className="summary-line total-line"><span>{t.total}</span><strong>{money(subtotal+deliveryFee-(approvedQuote?.discount??0))}</strong></div><p className="mt-5 text-xs text-[#927f73]">Final prices, coupon limits and delivery fees are recomputed in Postgres. Coupon previews may change before order submission.</p></aside>
     </form>
   </section>;
 }

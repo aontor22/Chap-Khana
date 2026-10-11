@@ -80,6 +80,7 @@ export function demoSalesReport(orders:Order[],from:string,to:string):SalesRepor
       row.completed++;totals.completed++;
       const orderValue=asInt(order.total);row.order_value+=orderValue;totals.order_value+=orderValue;
       totals.item_value+=asInt(order.subtotal);totals.delivery_fees+=asInt(order.delivery_fee);
+      const couponSaving=asInt(order.coupon_discount);row.savings+=couponSaving;totals.savings+=couponSaving;
       for(const item of (order.order_items??[]) as OrderItem[]){
         const saving=Math.max(0,asInt(item.discount_unit_amount))*asInt(item.qty);
         row.savings+=saving;totals.savings+=saving;totals.units+=asInt(item.qty);

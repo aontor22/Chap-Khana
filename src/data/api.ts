@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
+import { type CouponCampaign, type CouponQuote, DEFAULT_DEMO_COUPONS, normalizeCouponCode, isCouponCode, localCouponQuote, validateCouponCampaign } from '../lib/coupons';
 import { normalizeStoreSettings } from '../lib/storeProfile';
 import { ADMIN_ORDER_PAGE_SIZE, dhakaDayBounds, filterDemoOrders, normalizeOrderSearch, paginateOrders, validateOrderFilters, type OrderFilter, type OrderPage } from '../lib/orderManagement';
 import { demoMenu, demoSettings } from './demo';
@@ -19,10 +20,11 @@ export const getSettings = async (): Promise<StoreSettings> => {
   const {data,error}=await db().from('store_settings').select('*').eq('id',1).single(); fail(error);
   return normalizeStoreSettings(data as Partial<StoreSettings>);
 };
-export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[], settings: StoreSettings, requestId: string): Promise<OrderReceipt> => {
+export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[], settings: StoreSettings, requestId: string, couponCode?: string): Promise<OrderReceipt> => {
   const items=Object.entries(cart).filter(([,qty])=>qty>0).map(([id,qty])=>({id,qty}));
   if (supabase) {
-    const {data,error}=await db().rpc('place_order_v2',{p_request_id:requestId,p_name:info.name.trim(),p_phone:info.phone.replace(/[\s-]/g,''),p_type:info.type,p_address:info.address.trim(),p_notes:info.notes.trim(),p_items:items});
+    const args={p_request_id:requestId,p_name:info.name.trim(),p_phone:info.phone.replace(/[\s-]/g,''),p_type:info.type,p_address:info.address.trim(),p_notes:info.notes.trim(),p_items:items};
+    const {data,error}=couponCode?await db().rpc('place_order_v3',{...args,p_coupon:normalizeCouponCode(couponCode)}):await db().rpc('place_order_v2',args);
     fail(error); if (!data || typeof data !== 'object' || !('tracking_token' in data)) throw new Error('Order acknowledgement was not received. Contact the restaurant before trying again.');
     return data as unknown as OrderReceipt;
   }
@@ -31,9 +33,12 @@ export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[],
   const stamp=new Date().toISOString();const code='DEMO-'+crypto.randomUUID().slice(0,8).toUpperCase();const token=crypto.randomUUID();
   const orderItems=items.map(line=>{const item=menu.find(m=>m.id===line.id)!;const final=discountedUnitPrice(item)!;return {menu_item_id:item.id,item_name:item.name,unit_price:final,original_unit_price:item.price!,discount_unit_amount:item.price!-final,qty:line.qty,line_total:final*line.qty};});
   const subtotal=orderItems.reduce((s,i)=>s+i.line_total,0); const fee=info.type==='delivery'?settings.delivery_fee:0;
-  const order: Order={id:crypto.randomUUID(),code,tracking_token:token,customer_name:info.name,customer_phone:info.phone,delivery_address:info.address,notes:info.notes,fulfillment_type:info.type,status:'pending',subtotal,delivery_fee:fee,total:subtotal+fee,created_at:stamp,order_items:orderItems};
+  const coupon= couponCode ? await quoteCoupon(couponCode,cart,menu,info.type,fee):null;
+  const order: Order={id:crypto.randomUUID(),code,tracking_token:token,customer_name:info.name,customer_phone:info.phone,delivery_address:info.address,notes:info.notes,fulfillment_type:info.type,status:'pending',subtotal,delivery_fee:fee,total:subtotal+fee-(coupon?.discount??0),coupon_code:coupon?.code??null,coupon_discount:coupon?.discount??0,created_at:stamp,order_items:orderItems};
   saveStorage('ckr_demo_orders',[order,...fromStorage<Order[]>('ckr_demo_orders',[])]);
-  return {code,tracking_token:token,total:order.total,demo:true};
+  if(coupon){const list=fromStorage<CouponCampaign[]>('ckr_demo_coupons_v1',DEFAULT_DEMO_COUPONS);
+    saveStorage('ckr_demo_coupons_v1',list.map(c=>c.code===coupon.code?{...c,used_count:c.used_count+1}:c));}
+  return {code,tracking_token:token,total:order.total,demo:true,coupon_code:coupon?.code??null,coupon_discount:coupon?.discount??0};
 };
 export const trackOrder = async (token: string): Promise<TrackingResult | null> => {
   if (!supabase) {
@@ -100,4 +105,36 @@ export const getSalesReport=async(from:string,to:string):Promise<SalesReport>=>{
   if(!supabase)return demoSalesReport(fromStorage<Order[]>('ckr_demo_orders',[]),from,to);
   const {data,error}=await db().rpc('staff_sales_report',{p_from:from,p_to:to});fail(error);
   return parseSalesReport(data,from,to);
+};
+
+// Coupon table is never exposed publicly: staff-only RLS applies to all row reads/writes.
+// Guest coupon previews use a limited RPC with server-calculated cart prices.
+const DEMO_COUPON_KEY='ckr_demo_coupons_v1';
+export const getCoupons=async():Promise<CouponCampaign[]>=>{
+  if(!supabase)return fromStorage<CouponCampaign[]>(DEMO_COUPON_KEY,DEFAULT_DEMO_COUPONS);
+  const {data,error}=await db().from('coupon_campaigns').select('*').order('created_at',{ascending:false});fail(error);
+  return (data||[]) as CouponCampaign[];
+};
+export const saveCouponCampaign=async(campaign:CouponCampaign,existing:boolean):Promise<void>=>{
+  const code=normalizeCouponCode(campaign.code);
+  const valid=validateCouponCampaign({...campaign,code});if(valid)throw new Error(valid);
+  const fields={discount_type:campaign.discount_type,discount_value:campaign.discount_value,min_subtotal:campaign.min_subtotal,
+    max_discount:campaign.max_discount,max_uses:campaign.max_uses,starts_at:campaign.starts_at,ends_at:campaign.ends_at,active:campaign.active};
+  if(!supabase){const current=fromStorage<CouponCampaign[]>(DEMO_COUPON_KEY,DEFAULT_DEMO_COUPONS);
+    if(!existing&&current.some(item=>item.code===code))throw new Error('Coupon code already exists.');
+    saveStorage(DEMO_COUPON_KEY,[...current.filter(item=>item.code!==code),{...campaign,...fields,code}]);return;}
+  if(existing){const {data,error}=await db().from('coupon_campaigns').update(fields).eq('code',code).select('code').single();fail(error);if(!data)throw new Error('Coupon was not saved.');}
+  else{const {error}=await db().from('coupon_campaigns').insert({...fields,code});fail(error);}
+};
+export const quoteCoupon=async(code:string,cart:Cart,menu:MenuItem[],type:CheckoutInfo['type'],fee:number):Promise<CouponQuote>=>{
+  const normalized=normalizeCouponCode(code);
+  if(!isCouponCode(normalized))throw new Error('Enter a valid coupon code.');
+  const items=Object.entries(cart).filter(([,qty])=>qty>0).map(([id,qty])=>({id,qty}));
+  if(!supabase){const campaign=fromStorage<CouponCampaign[]>(DEMO_COUPON_KEY,DEFAULT_DEMO_COUPONS).find(c=>c.code===normalized);
+    if(!campaign)throw new Error('Coupon is invalid or unavailable.');
+    return localCouponQuote(campaign,cart,menu,fee);}
+  const {data,error}=await db().rpc('quote_coupon',{p_code:normalized,p_items:items,p_type:type});fail(error);
+  const quote=data as unknown as CouponQuote;
+  if(!quote||quote.code!==normalized||!Number.isSafeInteger(quote.discount)||quote.discount<1)throw new Error('Could not validate the coupon.');
+  return quote;
 };
