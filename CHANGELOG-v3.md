@@ -59,3 +59,10 @@
 - Published hours, location and social links in responsive homepage/footer.
 - Added an independent public announcement banner, safe URL/phone validation, new migration 07.
 - Online ordering switch remains independent of business-hours display.
+
+
+## v3.6.0 — Phase 1 launch security
+- Added `08_launch_security.sql` to revoke the obsolete checkout RPC, retain secure checkout v2, and restore the weekly-hours validator's execute permission for authenticated staff.
+- Restored status-only order update privilege and included transactional permission assertions.
+- Added database ACL regression tests, CI `npm ci`, and production dependency audit.
+- No customer data, menu prices, discounts, order history or branding changed.

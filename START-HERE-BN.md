@@ -91,3 +91,7 @@ Google দিয়ে লগইন করার পর Supabase `admin_users`-এ 
 
 ## v3.5 settings, hours and Facebook
 Existing database-এ আগের 01, 03, 04, 05, 06 successful থাকলে এবার শুধু `supabase/migrations/07_restaurant_profile_hours.sql` run করবে। তারপর Admin → Settings-এ opening hours, public phone, Facebook, Google Maps, address, optional WhatsApp/Instagram, announcement edit করতে পারবে। Full guide: `docs/RESTAURANT-SETTINGS-v3.5-BN.md`।
+
+
+## v3.6.0 Security Update (Phase 1)
+আগের 01–07 SQL সফলভাবে run করে থাকলে Supabase SQL Editor-এ **শুধু** `supabase/migrations/08_launch_security.sql` run করো। এতে পুরোনো unsafe checkout RPC-এর public access বন্ধ এবং Admin Settings-এর weekly-hours validator permission ঠিক হবে। বিস্তারিত: `docs/SECURITY-PHASE1-v3.6-BN.md`। Live database-এ চালানোর আগে staging-এ পরীক্ষা ও backup রাখবে।

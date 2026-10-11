@@ -154,3 +154,7 @@ Approved Supabase staff now have a responsive Admin shortcut in the header, mobi
 ## Restaurant profile / opening hours (v3.5)
 
 After migration `supabase/migrations/07_restaurant_profile_hours.sql`, Admin → Settings supports per-day opening hours (Asia/Dhaka), phone, address, optional WhatsApp and Instagram, Facebook, Maps, dine-in, announcements, pickup/delivery and fee. Information appears in homepage and footer. Schedule visibility does not automatically determine the backend `accepting_orders` flag; explicitly pause orders when the business is unavailable. No existing order rows or discounts are modified.
+
+
+### v3.6 Phase 1 security update
+If you already applied migrations 01–07, run `supabase/migrations/08_launch_security.sql` in Supabase SQL Editor **before** deploying. This prevents the legacy RPC from bypassing v2 checkout protections and fixes admin weekly-hours validation permissions. Refer to [Phase 1 security guide](docs/SECURITY-PHASE1-v3.6-BN.md) for read-only verification SQL and staging tests. The codebase is not independently tested against your live Supabase project.

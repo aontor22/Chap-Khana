@@ -12,10 +12,13 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Static type check and production build
         run: npm run build
       - name: Photo menu and SQL consistency tests
         run: npm run test:catalog
       - name: Unit tests
         run: npm test
+
+      - name: Audit production dependencies
+        run: npm run audit:production
