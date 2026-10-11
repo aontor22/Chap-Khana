@@ -1,3 +1,13 @@
+## v3.12.0 — Sales Analytics & Reports (2026-10-11)
+
+- New authorized-staff-only Sales & Reports tab on desktop and mobile.
+- Supabase `staff_sales_report(date,date)` aggregate RPC secured with an internal allowlist check; no customer PII in the response.
+- Asia/Dhaka date presets, 366-day date cap, daily/monthly breakdown, completed-value KPIs, top dishes and discount totals.
+- CSV downloads for daily, monthly and item reports; formula-injection protection.
+- Demo-mode aggregate report from local synthetic orders.
+- New migration `11_staff_sales_analytics.sql`; earlier database migrations remain unchanged.
+- Important: Completed order value reflects orders marked completed, **not confirmed payment collection**. Reports group orders by creation date (Dhaka).
+
 # v3 — Brand and menu catalog update
 
 - Added the logo recreation from the supplied printed menus to the navigation, footer, admin dashboard, item placeholders and favicon.

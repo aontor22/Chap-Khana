@@ -4,6 +4,7 @@ import { discountedUnitPrice } from '../lib/discount';
 import { normalizeStoreSettings } from '../lib/storeProfile';
 import { ADMIN_ORDER_PAGE_SIZE, dhakaDayBounds, filterDemoOrders, normalizeOrderSearch, paginateOrders, validateOrderFilters, type OrderFilter, type OrderPage } from '../lib/orderManagement';
 import { demoMenu, demoSettings } from './demo';
+import { demoSalesReport, parseSalesReport, validateReportRange, type SalesReport } from '../lib/salesAnalytics';
 import type { Cart, CheckoutInfo, MenuItem, Order, OrderReceipt, OrderStatus, StoreSettings, TrackingResult } from '../types';
 
 const db = () => { if (!supabase) throw new Error('Supabase is not configured.'); return supabase; };
@@ -91,4 +92,12 @@ export const saveMenuItem=async (item:MenuItem):Promise<void>=>{
 export const saveStoreSettings=async (settings:StoreSettings):Promise<void>=>{
   if (!supabase) {saveStorage('ckr_demo_settings',normalizeStoreSettings(settings));return;}
   const {data,error}=await db().from('store_settings').update({accepting_orders:settings.accepting_orders,delivery_enabled:settings.delivery_enabled,pickup_enabled:settings.pickup_enabled,delivery_fee:settings.delivery_fee,contact_phone:settings.contact_phone,whatsapp_phone:settings.whatsapp_phone,address_text:settings.address_text,maps_url:settings.maps_url,facebook_url:settings.facebook_url,instagram_url:settings.instagram_url,hours_note:settings.hours_note,announcement:settings.announcement,dine_in_enabled:settings.dine_in_enabled,weekly_hours:settings.weekly_hours}).eq('id',1).select('id').single();fail(error);if(!data)throw new Error('Store settings update was not confirmed.');
+};
+
+// Aggregate reporting only: no PII is returned to this dashboard or CSV exports.
+export const getSalesReport=async(from:string,to:string):Promise<SalesReport>=>{
+  const validation=validateReportRange(from,to);if(validation)throw new Error(validation);
+  if(!supabase)return demoSalesReport(fromStorage<Order[]>('ckr_demo_orders',[]),from,to);
+  const {data,error}=await db().rpc('staff_sales_report',{p_from:from,p_to:to});fail(error);
+  return parseSalesReport(data,from,to);
 };

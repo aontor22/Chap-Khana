@@ -1,3 +1,7 @@
+## v3.12 Sales Analytics & Reports
+
+Authorized admins can open **Admin → Sales & reports** to review aggregate completed-order value, date trends, popular items, discounts and CSV exports. These figures are not payment reconciliation. Run `supabase/migrations/11_staff_sales_analytics.sql` (after discount and security migrations) for live reporting. See `docs/PHASE4-SALES-REPORTS-v3.12-BN.md` for installation and QA.
+
 # Chap Khana — React + TypeScript restaurant ordering platform
 
 **Version:** 3.2.0 (brand + menu reference photography) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
