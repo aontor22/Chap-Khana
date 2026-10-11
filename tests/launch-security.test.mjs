@@ -30,7 +30,7 @@ test('Staff hours validator can execute without relaxing the staff-only table po
 });
 
 test('Version and CI security checks are in sync', () => {
-  assert.equal(pkg.version,'3.7.0');
+  assert.equal(pkg.version,'3.8.0');
   assert.equal(lock.version,pkg.version);
   assert.equal(lock.packages[''].version,pkg.version);
   assert.match(pkg.scripts['test:catalog'],/launch-security\.test\.mjs/);

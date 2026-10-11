@@ -73,3 +73,11 @@
 - Added in-app new-order alerts, unread order indicator and click-to-enable chime.
 - Kept 20s polling backup; reset alerts and subscriptions on staff logout.
 - Added cursor, subscription and migration safety tests.
+
+
+## v3.8.0 — Advanced order management
+- Added paginated, server-filtered staff order browsing (15 rows per page).
+- Added separate order-code, customer-name, customer-phone search and status/date-range filters in Asia/Dhaka timezone.
+- Added detailed order modal and printer-friendly kitchen ticket with original order line snapshots.
+- Kept v3.7 Realtime notifications and 20-second polling fallback intact.
+- No new database schema or migration required for this release.

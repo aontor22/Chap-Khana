@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
 import { normalizeStoreSettings } from '../lib/storeProfile';
+import { ADMIN_ORDER_PAGE_SIZE, dhakaDayBounds, filterDemoOrders, normalizeOrderSearch, paginateOrders, validateOrderFilters, type OrderFilter, type OrderPage } from '../lib/orderManagement';
 import { demoMenu, demoSettings } from './demo';
 import type { Cart, CheckoutInfo, MenuItem, Order, OrderReceipt, OrderStatus, StoreSettings, TrackingResult } from '../types';
 
@@ -54,6 +55,30 @@ export const isStaff=async (userId:string):Promise<boolean>=>{
 export const getAdminOrders=async ():Promise<Order[]> =>{
   if (!supabase) return fromStorage('ckr_demo_orders',[]);
   const {data,error}=await db().from('orders').select('*,order_items(*)').order('created_at',{ascending:false}).limit(100);fail(error);return (data||[]) as Order[];
+};
+// Admin-only reads. Supabase RLS remains the security boundary; UI filters are not authorization.
+// Use separate, typed column filters instead of composing raw PostgREST OR expressions.
+export const getAdminOrderPage=async (filter:OrderFilter,page:number):Promise<OrderPage>=>{
+  const validation=validateOrderFilters(filter);if(validation)throw new Error(validation);
+  const safePage=Math.max(1,Math.trunc(page)||1);
+  if(!supabase)return paginateOrders(filterDemoOrders(fromStorage<Order[]>('ckr_demo_orders',[]),filter),safePage);
+  let query=db().from('orders')
+    .select('id,code,customer_name,customer_phone,fulfillment_type,status,total,created_at', {count:'exact'})
+    .order('created_at',{ascending:false})
+    .range((safePage-1)*ADMIN_ORDER_PAGE_SIZE,safePage*ADMIN_ORDER_PAGE_SIZE-1);
+  if(filter.status!=='all')query=query.eq('status',filter.status);
+  const search=normalizeOrderSearch(filter.search);
+  if(search)query=query.ilike(filter.searchField,`%${search}%`);
+  if(filter.fromDate)query=query.gte('created_at',dhakaDayBounds(filter.fromDate)!.start);
+  if(filter.toDate)query=query.lt('created_at',dhakaDayBounds(filter.toDate)!.end);
+  const {data,error,count}=await query;fail(error);
+  return {rows:(data||[]) as Order[],total:count??0};
+};
+export const getAdminOrderDetail=async(id:string):Promise<Order>=>{
+  if(!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(id))throw new Error('Invalid order ID.');
+  if(!supabase){const order=fromStorage<Order[]>('ckr_demo_orders',[]).find(o=>o.id===id);if(!order)throw new Error('Order not found.');return order;}
+  const {data,error}=await db().from('orders').select('*,order_items(*)').eq('id',id).single();fail(error);
+  if(!data)throw new Error('Order not found.');return data as Order;
 };
 export const changeOrderStatus=async (id:string,status:OrderStatus):Promise<void>=>{
   if (!supabase) {saveStorage('ckr_demo_orders',fromStorage<Order[]>('ckr_demo_orders',[]).map(o=>o.id===id?{...o,status}:o));return;}

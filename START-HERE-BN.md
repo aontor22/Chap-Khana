@@ -100,3 +100,6 @@ Existing database-এ আগের 01, 03, 04, 05, 06 successful থাকলে
 ## v3.7: নতুন Order Alert
 
 Admin Dashboard-এ নতুন order alert, unread counter ও `Enable sound` button যুক্ত হয়েছে। SQL 09 এখনই run না করতে পারলে সমস্যা নেই: আগের মতো ২০ সেকেন্ড অন্তর polling চলবে। পরে প্রথমে pending SQL 08, তারপর `supabase/migrations/09_admin_order_realtime.sql` চালাবে। সম্পূর্ণ guide: `docs/PHASE2-ORDER-NOTIFICATIONS-BN.md`।
+
+### v3.8.0 — Advanced Order Management
+Admin → Orders-এ Search, Date/Status Filters, 15-per-page navigation, Order Details এবং Print Kitchen Ticket যোগ হয়েছে। **v3.8-এর জন্য কোনো নতুন SQL migration লাগবে না।** আগের pending 08 ও 09 migration পরে করতে পারবে। বিস্তারিত `docs/PHASE2-ADVANCED-ORDERS-v3.8-BN.md` দেখো।

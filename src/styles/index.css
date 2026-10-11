@@ -154,3 +154,22 @@
 .social-button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;background:#fff4ea;color:#783c21;border:1px solid #e6cdb8;font-weight:700;font-size:13px;}
 .social-button:hover{background:#fde8d5}
 .public-announcement{background:#fce6d7;color:#762f19;border-bottom:1px solid #f2c7aa;padding:12px 20px;text-align:center;font-size:13px;font-weight:600;}
+
+/* v3.8: screen-first order browser and clean thermal / paper kitchen ticket. */
+.print-kitchen { color:#211810; background:white; }
+.print-kitchen strong { font-weight:800; }
+@media print {
+  @page { margin: 7mm; }
+  body * { visibility:hidden !important; }
+  .print-kitchen, .print-kitchen * { visibility:visible !important; }
+  .print-kitchen {
+    position:absolute !important; top:0 !important; left:0 !important;
+    width:100% !important; max-width:80mm !important;
+    margin:0 !important; padding:0 !important;
+    box-shadow:none !important; color:#000 !important;
+    background:#fff !important; font-size:12px !important;
+  }
+  .print-kitchen * { color:#000 !important; background:transparent !important; box-shadow:none !important; }
+  .order-detail-overlay, .order-detail-overlay .modal-dialog { overflow:visible !important; max-height:none !important; box-shadow:none !important; border:0 !important; }
+  .no-print { display:none !important; }
+}
