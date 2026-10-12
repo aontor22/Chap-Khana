@@ -131,3 +131,10 @@
 - Added SQL migration 14 with default-OFF enforcement, checkout-time reservation, atomic stock checks, cancellation refunds from snapshots and staff-only CRUD RPCs.
 - Added read-only public dish availability without exposing ingredient quantities.
 - No existing menu, coupon, loyalty or historical order values are rewritten.
+
+## v3.16.0 — Supplier & Purchase Management
+- Added an admin supplier directory, purchase orders and partial/full goods receiving.
+- Supplier records and purchase history have staff-only RLS. Orders and receipt changes use guarded PostgreSQL RPCs.
+- Receiving ingredients increments the existing v3.15 inventory stock and movements atomically; request UUIDs make retries idempotent.
+- Costs are estimates, not recorded supplier payments. No existing customer orders or prices are changed.
+- Added additive SQL migration `15_supplier_purchasing.sql` and source/calculation tests.

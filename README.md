@@ -193,3 +193,8 @@ Customer points are earned on completed signed-in orders; redemption happens ser
 ### Inventory v3.15
 
 Inventory settings, ingredient stock/recipe editor, menu serving limits and movement logs are under **Admin → Inventory**. Run migration `14_inventory_management.sql` after migration 13, but leave enforcement OFF until the real stock counts and recipes are configured. See `docs/PHASE5-INVENTORY-v3.15-BN.md` for rollback expectations, staging tests and account restrictions. Existing order placement stays on the same versioned checkout RPCs (v2/v3/v4), with inventory reservation enforced through a transactional trigger on `order_items`.
+
+### v3.16 Purchasing
+
+Admin → Purchasing adds suppliers, ingredient purchase drafts, goods receiving and receipt history.
+Run `supabase/migrations/15_supplier_purchasing.sql` **after** migration 14, and test in staging before enabling live purchasing. See `docs/PHASE5-SUPPLIER-PURCHASING-v3.16-BN.md`.

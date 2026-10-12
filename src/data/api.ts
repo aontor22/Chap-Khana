@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { EMPTY_PURCHASES, validateSupplier, validatePurchaseLines, validateReceipt, outstanding, type Supplier, type PurchaseDraftLine, type PurchaseSnapshot, type PurchaseOrder, type PurchaseReceipt, type ReceiptDraftLine } from '../lib/purchasing';
 import { EMPTY_INVENTORY, type InventorySnapshot, type Ingredient, type InventoryKind, type RecipeLine } from '../lib/inventory';
 import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
@@ -218,4 +219,57 @@ export const replaceInventoryRecipe=async(id:string,lines:Array<Pick<RecipeLine,
 export const adjustInventoryStock=async(kind:InventoryKind,id:string,delta:number,reason:string)=>{
  if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);if(kind==='ingredient'){const target=old.ingredients.find(i=>i.id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,ingredients:old.ingredients.map(i=>i.id===id?{...i,on_hand:i.on_hand+delta}:i)});}else{const target=old.menuStock.find(i=>i.menu_item_id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,menuStock:old.menuStock.map(i=>i.menu_item_id===id?{...i,on_hand:i.on_hand+delta}:i)});}return;}
  const {error}=await db().rpc('inventory_adjust_stock',{p_kind:kind,p_id:id,p_delta:delta,p_reason:reason});fail(error);
+};
+
+// Supplier purchasing: staff-only Postgres rows and SECURITY DEFINER RPCs.
+// Goods receiving is atomic with inventory movements, and request IDs are idempotent.
+const PURCHASE_DEMO_KEY='ckr_demo_purchase_v316';
+export const getPurchasingSnapshot=async():Promise<PurchaseSnapshot>=>{
+ if(!supabase)return fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);
+ const [suppliers,orders,receipts]=await Promise.all([
+   db().from('purchase_suppliers').select('*').order('name'),
+   db().from('purchase_orders').select('*,purchase_order_lines(*)').order('created_at',{ascending:false}).limit(50),
+   db().from('purchase_receipts').select('*,purchase_receipt_lines(*)').order('received_at',{ascending:false}).limit(50)
+ ]);
+ fail(suppliers.error);fail(orders.error);fail(receipts.error);
+ return {suppliers:(suppliers.data||[]) as Supplier[],orders:(orders.data||[]) as PurchaseOrder[],receipts:(receipts.data||[]) as PurchaseReceipt[]};
+};
+export const savePurchaseSupplier=async(input:Supplier,existing:boolean):Promise<void>=>{
+ const problem=validateSupplier(input);if(problem)throw new Error(problem);
+ const data={name:input.name.trim(),phone:input.phone.trim(),email:input.email.trim(),notes:input.notes.trim(),active:input.active};
+ if(!supabase){const snap=fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);const newItem={...data,id:existing?input.id:crypto.randomUUID()};saveStorage(PURCHASE_DEMO_KEY,{...snap,suppliers:existing?snap.suppliers.map(s=>s.id===input.id?{...s,...newItem}:s):[newItem,...snap.suppliers]});return;}
+ if(existing){const {error}=await db().from('purchase_suppliers').update(data).eq('id',input.id);fail(error);}
+ else {const {error}=await db().from('purchase_suppliers').insert(data);fail(error);}
+};
+export const createPurchaseOrder=async(supplier:string,notes:string,lines:PurchaseDraftLine[],units:Map<string,string>):Promise<string>=>{
+ const problem=validatePurchaseLines(lines,units);if(problem)throw new Error(problem);
+ if(!supplier)throw new Error('Choose a supplier.');
+ if(notes.length>500)throw new Error('Notes too long.');
+ if(!supabase){const snap=fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);const id=crypto.randomUUID();const now=new Date().toISOString();
+  const order:PurchaseOrder={id,supplier_id:supplier,status:'draft',notes,created_at:now,purchase_order_lines:lines.map(l=>({...l,id:crypto.randomUUID(),order_id:id,received_qty:0}))};
+  saveStorage(PURCHASE_DEMO_KEY,{...snap,orders:[order,...snap.orders]});return id;}
+ const {data,error}=await db().rpc('purchase_create_order',{p_supplier:supplier,p_notes:notes,p_lines:lines});fail(error);
+ if(typeof data!=='string')throw new Error('Purchase order ID was not returned.');return data;
+};
+export const updatePurchaseOrderStatus=async(id:string,status:'ordered'|'cancelled'):Promise<void>=>{
+ if(!supabase){const snap=fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);const o=snap.orders.find(x=>x.id===id);if(!o||!(o.status==='draft'&&['ordered','cancelled'].includes(status)||o.status==='ordered'&&status==='cancelled'))throw new Error('Invalid purchase status change.');
+  saveStorage(PURCHASE_DEMO_KEY,{...snap,orders:snap.orders.map(x=>x.id===id?{...x,status}:x)});return;}
+ const {error}=await db().rpc('purchase_change_status',{p_order:id,p_status:status});fail(error);
+};
+export const receivePurchaseOrder=async(order:PurchaseOrder,requestId:string,lines:ReceiptDraftLine[],units:Map<string,string>):Promise<void>=>{
+ const problem=validateReceipt(lines,order,units);if(problem)throw new Error(problem);
+ if(!supabase){const snap=fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);
+  const prev=snap.receipts.find(r=>r.request_id===requestId);if(prev){if(prev.order_id===order.id)return;throw new Error('Receipt request already used.');}
+  const current=snap.orders.find(o=>o.id===order.id);if(!current||!['ordered','partially_received'].includes(current.status))throw new Error('Order is not receivable.');
+  const check=validateReceipt(lines,current,units);if(check)throw new Error(check);
+  const edited=current.purchase_order_lines.map(l=>({...l,received_qty:l.received_qty+(lines.find(x=>x.line_id===l.id)?.quantity||0)}));
+  const newStatus=edited.every(l=>outstanding(l)===0)?'received':'partially_received';const receiptId=crypto.randomUUID();
+  const receipt:PurchaseReceipt={id:receiptId,order_id:order.id,request_id:requestId,received_at:new Date().toISOString(),purchase_receipt_lines:lines.map(x=>({receipt_id:receiptId,order_line_id:x.line_id,quantity:x.quantity,unit_cost_snapshot:current.purchase_order_lines.find(l=>l.id===x.line_id)!.unit_cost}))};
+  // Demo mode persists both purchasing and ingredient stock in this browser only.
+  const inv=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);
+  const quantities=new Map<string,number>();for(const x of lines){const ing=current.purchase_order_lines.find(l=>l.id===x.line_id)!.ingredient_id;quantities.set(ing,(quantities.get(ing)||0)+x.quantity);}
+  saveStorage(DEMO_INV_KEY,{...inv,ingredients:inv.ingredients.map(i=>({...i,on_hand:i.on_hand+(quantities.get(i.id)||0)}))});
+  saveStorage(PURCHASE_DEMO_KEY,{...snap,orders:snap.orders.map(o=>o.id===order.id?{...o,status:newStatus,purchase_order_lines:edited}:o),receipts:[receipt,...snap.receipts]});return;
+ }
+ const {error}=await db().rpc('purchase_receive',{p_order:order.id,p_request:requestId,p_lines:lines});fail(error);
 };

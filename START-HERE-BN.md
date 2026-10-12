@@ -132,3 +132,7 @@ Supabase-এর 01–12 migration আগে থাকতে হবে। `supaba
 - Admin → Inventory-তে ingredients, stock, recipe, dish serving limit configure করবে।
 - Inventory ডিফল্টভাবে **OFF**। Final QA না করে enable করবে না।
 - Details: `docs/PHASE5-INVENTORY-v3.15-BN.md`
+
+### v3.16.0 — Suppliers and Purchasing
+
+Admin → Purchasing-এ supplier, PO এবং raw ingredient receiving যোগ হয়েছে। Database-এ `14_inventory_management.sql` আগে সফলভাবে run করা থাকতে হবে। নতুন `15_supplier_purchasing.sql` staging-এ run করে stock receipt, partial receiving, repeated request এবং staff-only permissions যাচাই করার পর production-এ প্রয়োগ করবে। বিস্তারিত: `docs/PHASE5-SUPPLIER-PURCHASING-v3.16-BN.md`।
