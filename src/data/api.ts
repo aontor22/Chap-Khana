@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { EMPTY_INVENTORY, type InventorySnapshot, type Ingredient, type InventoryKind, type RecipeLine } from '../lib/inventory';
 import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
 import { discountedUnitPrice } from '../lib/discount';
@@ -14,7 +15,13 @@ const fail = (error: { message: string } | null) => { if (error) throw new Error
 export const getMenu = async (): Promise<MenuItem[]> => {
   if (!supabase) return fromStorage('ckr_demo_menu_v3',demoMenu);
   const {data,error}=await db().from('menu_items').select('*').order('sort_order'); fail(error);
-  return (data || []) as MenuItem[];
+  const menu=(data||[]) as MenuItem[];
+  // Stock availability is computed by a read-only RPC; missing migration 14
+  // should not block the earlier public storefront from loading.
+  const {data:availability,error:availabilityError}=await db().rpc('menu_inventory_availability');
+  if(availabilityError){if(!availabilityError.message.includes('menu_inventory_availability'))console.warn('Inventory availability unavailable',availabilityError.message);return menu;}
+  const available=new Map((availability||[]).map((row:{menu_item_id:string;in_stock:boolean})=>([row.menu_item_id,row.in_stock] as const)));
+  return menu.map(item=>({...item,in_stock:available.get(item.id)!==false}));
 };
 export const getSettings = async (): Promise<StoreSettings> => {
   if (!supabase) return normalizeStoreSettings(fromStorage('ckr_demo_settings',demoSettings));
@@ -31,7 +38,7 @@ export const placeOrder = async (info: CheckoutInfo,cart: Cart,menu: MenuItem[],
   }
   if(redeemPoints>0)throw new Error('Loyalty redemption requires a live signed-in account.');
   if(!items.length)throw new Error('Choose at least one available item.');
-  for(const line of items){const item=menu.find(x=>x.id===line.id);if(!item?.active||!item.available||!Number.isInteger(item.price)||!item.price||item.price<1)throw new Error('Cart contains a dish with an unconfirmed price. Refresh and try again.');}
+  for(const line of items){const item=menu.find(x=>x.id===line.id);if(!item?.active||!item.available||item.in_stock===false||!Number.isInteger(item.price)||!item.price||item.price<1)throw new Error('Cart contains a dish with an unconfirmed price. Refresh and try again.');}
   const stamp=new Date().toISOString();const code='DEMO-'+crypto.randomUUID().slice(0,8).toUpperCase();const token=crypto.randomUUID();
   const orderItems=items.map(line=>{const item=menu.find(m=>m.id===line.id)!;const final=discountedUnitPrice(item)!;return {menu_item_id:item.id,item_name:item.name,unit_price:final,original_unit_price:item.price!,discount_unit_amount:item.price!-final,qty:line.qty,line_total:final*line.qty};});
   const subtotal=orderItems.reduce((s,i)=>s+i.line_total,0); const fee=info.type==='delivery'?settings.delivery_fee:0;
@@ -168,4 +175,47 @@ export const saveLoyaltySettings=async(settings:LoyaltySettings):Promise<void>=>
     max_redeem_percent:settings.max_redeem_percent,updated_at:new Date().toISOString()
   }).eq('id',1).select('id').single();fail(error);
   if(!data)throw new Error('Rewards settings could not be saved.');
+};
+
+// Inventory mutations are done through staff-only PostgreSQL RPCs. Browser users
+// can NEVER write on_hand, reservations, or inventory movement records directly.
+const DEMO_INV_KEY='ckr_demo_inventory_v315';
+export const getInventorySnapshot=async():Promise<InventorySnapshot>=>{
+ if(!supabase)return fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);
+ const [settings,ingredients,menuStock,recipes,movements]=await Promise.all([
+   db().from('inventory_settings').select('enabled').eq('id',1).single(),
+   db().from('inventory_ingredients').select('*').order('name'),
+   db().from('inventory_menu_stock').select('*').order('menu_item_id'),
+   db().from('inventory_recipes').select('*').order('menu_item_id'),
+   db().from('inventory_movements').select('*').order('created_at',{ascending:false}).limit(80)
+ ]);
+ fail(settings.error);fail(ingredients.error);fail(menuStock.error);fail(recipes.error);fail(movements.error);
+ return {enabled:Boolean(settings.data?.enabled),ingredients:(ingredients.data||[]) as Ingredient[],
+  menuStock:(menuStock.data||[]) as InventorySnapshot['menuStock'],
+  recipes:(recipes.data||[]) as RecipeLine[],movements:(movements.data||[]) as InventorySnapshot['movements']};
+};
+export const setInventoryEnabled=async(enabled:boolean)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);saveStorage(DEMO_INV_KEY,{...old,enabled});return;}
+ const {data,error}=await db().from('inventory_settings').update({enabled}).eq('id',1).select('id').single();fail(error);
+ if(!data)throw new Error('Inventory settings not saved.');
+};
+export const createInventoryIngredient=async(input:Pick<Ingredient,'name'|'unit'|'reorder_level'|'tracked'|'active'>)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);saveStorage(DEMO_INV_KEY,{...old,ingredients:[...old.ingredients,{...input,id:crypto.randomUUID(),on_hand:0}]});return;}
+ const {error}=await db().from('inventory_ingredients').insert(input);fail(error);
+};
+export const updateInventoryIngredient=async(id:string,fields:Pick<Ingredient,'name'|'reorder_level'|'tracked'|'active'>)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);saveStorage(DEMO_INV_KEY,{...old,ingredients:old.ingredients.map(i=>i.id===id?{...i,...fields}:i)});return;}
+ const {error}=await db().from('inventory_ingredients').update(fields).eq('id',id);fail(error);
+};
+export const configureMenuStock=async(id:string,tracked:boolean,threshold:number)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);saveStorage(DEMO_INV_KEY,{...old,menuStock:[...old.menuStock.filter(m=>m.menu_item_id!==id),{menu_item_id:id,tracked,on_hand:old.menuStock.find(m=>m.menu_item_id===id)?.on_hand??0,reorder_level:threshold}]});return;}
+ const {error}=await db().rpc('inventory_configure_menu',{p_item:id,p_tracked:tracked,p_reorder:threshold});fail(error);
+};
+export const replaceInventoryRecipe=async(id:string,lines:Array<Pick<RecipeLine,'ingredient_id'|'quantity_per_item'>>)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);saveStorage(DEMO_INV_KEY,{...old,recipes:[...old.recipes.filter(r=>r.menu_item_id!==id),...lines.map(l=>({...l,menu_item_id:id}))]});return;}
+ const {error}=await db().rpc('inventory_set_recipe',{p_item:id,p_lines:lines});fail(error);
+};
+export const adjustInventoryStock=async(kind:InventoryKind,id:string,delta:number,reason:string)=>{
+ if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);if(kind==='ingredient'){const target=old.ingredients.find(i=>i.id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,ingredients:old.ingredients.map(i=>i.id===id?{...i,on_hand:i.on_hand+delta}:i)});}else{const target=old.menuStock.find(i=>i.menu_item_id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,menuStock:old.menuStock.map(i=>i.menu_item_id===id?{...i,on_hand:i.on_hand+delta}:i)});}return;}
+ const {error}=await db().rpc('inventory_adjust_stock',{p_kind:kind,p_id:id,p_delta:delta,p_reason:reason});fail(error);
 };

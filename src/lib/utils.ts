@@ -17,7 +17,7 @@ export function validateCheckout(info: CheckoutInfo, cart: Cart, menu: MenuItem[
   for (const [id,qty] of lines) {
     if (!Number.isInteger(qty) || qty<1 || qty>20) return 'Choose 1–20 portions per dish.';
     const item=menu.find(m=>m.id===id);
-    if (!item || !item.active || !item.available || !item.price || item.price<1) return 'An item is unavailable. Refresh the menu.';
+    if (!item || !item.active || !item.available || item.in_stock===false || !item.price || item.price<1) return 'An item is unavailable. Refresh the menu.';
   }
   return null;
 }

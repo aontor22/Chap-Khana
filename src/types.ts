@@ -6,7 +6,7 @@ export type Locale = 'en' | 'bn';
 export type DiscountType = 'none' | 'percent' | 'fixed';
 export interface MenuItem {
   id: string; category: Category; name: string; name_bn: string; description: string; description_bn: string;
-  price: number | null; discount_type?: DiscountType; discount_value?: number; image_url: string; badge: string; sort_order: number; active: boolean; available: boolean;
+  price: number | null; discount_type?: DiscountType; discount_value?: number; image_url: string; badge: string; sort_order: number; active: boolean; available: boolean; in_stock?: boolean;
 }
 export type DayKey = 'monday'|'tuesday'|'wednesday'|'thursday'|'friday'|'saturday'|'sunday';
 export interface OpeningHours { open:string; close:string; closed:boolean }

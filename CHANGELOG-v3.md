@@ -125,3 +125,9 @@
 - Optional authenticated checkout point redemption with PostgreSQL-computed discount and strict wallet locks.
 - Database migration 13 credits signed-in customers on completed orders; refunds reserved points for cancelled orders without double-crediting retries.
 - Existing item discounts, coupons, guest checkout, menu and orders remain supported. Existing orders are NOT backfilled.
+
+## v3.15.0 — Inventory Management (menu servings + ingredient recipes)
+- Added staff inventory management: ingredient stock, unit-aware recipe quantities, per-menu serving limits, low-stock thresholds, adjustment history.
+- Added SQL migration 14 with default-OFF enforcement, checkout-time reservation, atomic stock checks, cancellation refunds from snapshots and staff-only CRUD RPCs.
+- Added read-only public dish availability without exposing ingredient quantities.
+- No existing menu, coupon, loyalty or historical order values are rewritten.

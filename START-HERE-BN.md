@@ -126,3 +126,9 @@ Checkout successful হলে `/order-confirmation` page দেখাবে; এ
 
 ## v3.14 Loyalty Update
 Supabase-এর 01–12 migration আগে থাকতে হবে। `supabase/migrations/13_customer_loyalty.sql` staging-এ পরীক্ষা করে production-এ run করবে। Rewards প্রথমে OFF থাকবে। Admin → Rewards থেকে ON করবে। Google-login customer My Account-এ balance দেখবে এবং Checkout-এ points ব্যবহার করতে পারবে।
+
+## v3.15 Inventory Setup
+- আগের migrations 01–13 successful হলে **শুধু `supabase/migrations/14_inventory_management.sql`** run করবে।
+- Admin → Inventory-তে ingredients, stock, recipe, dish serving limit configure করবে।
+- Inventory ডিফল্টভাবে **OFF**। Final QA না করে enable করবে না।
+- Details: `docs/PHASE5-INVENTORY-v3.15-BN.md`

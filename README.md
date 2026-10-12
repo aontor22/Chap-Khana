@@ -189,3 +189,7 @@ Coupon promotion setup and security verification: `docs/PHASE4-COUPONS-v3.13-BN.
 
 ## v3.14 Rewards program
 Customer points are earned on completed signed-in orders; redemption happens server-side through a locked wallet and a dedicated `place_order_v4` RPC. After applying earlier migrations through 12, apply `supabase/migrations/13_customer_loyalty.sql` in staging then production. Program is **OFF** initially. Admin → Rewards configures rules; My Account displays customer balance. See `docs/PHASE4-LOYALTY-v3.14-BN.md`.
+
+### Inventory v3.15
+
+Inventory settings, ingredient stock/recipe editor, menu serving limits and movement logs are under **Admin → Inventory**. Run migration `14_inventory_management.sql` after migration 13, but leave enforcement OFF until the real stock counts and recipes are configured. See `docs/PHASE5-INVENTORY-v3.15-BN.md` for rollback expectations, staging tests and account restrictions. Existing order placement stays on the same versioned checkout RPCs (v2/v3/v4), with inventory reservation enforced through a transactional trigger on `order_items`.

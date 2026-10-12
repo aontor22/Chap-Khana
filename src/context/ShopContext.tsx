@@ -37,7 +37,7 @@ export function ShopProvider({children}:{children:ReactNode}) {
   useEffect(()=>{saveStorage('ckr_cart',cart);},[cart]);
   useEffect(()=>{if (!alert) return;const timeout=setTimeout(()=>setAlert(''),4600);return ()=>clearTimeout(timeout);},[alert]);
   const refresh=useCallback(async()=>{
-    try {const [items,cfg]=await Promise.all([getMenu(),getSettings()]);setMenu(items);setSettings(cfg);setCart(prev=>Object.fromEntries(Object.entries(prev).filter(([id,qty])=>qty>0&&items.some(m=>m.id===id&&m.active&&m.available&&Boolean(m.price)))));setError(null);}
+    try {const [items,cfg]=await Promise.all([getMenu(),getSettings()]);setMenu(items);setSettings(cfg);setCart(prev=>Object.fromEntries(Object.entries(prev).filter(([id,qty])=>qty>0&&items.some(m=>m.id===id&&m.active&&m.available&&m.in_stock!==false&&Boolean(m.price)))));setError(null);}
     catch(e){setError(e instanceof Error?e.message:'Could not load menu.');}
     finally{setLoading(false);}
   },[]);
@@ -91,7 +91,7 @@ export function ShopProvider({children}:{children:ReactNode}) {
   const signOut=async()=>{if(!supabase)return;const {error}=await supabase.auth.signOut();if(error)throw error;};
   const add=(id:string)=>{
     const item=menu.find(m=>m.id===id);
-    if (!settings.accepting_orders || !item?.active || !item.available || !item.price){notify('This item cannot be ordered right now.');return;}
+    if (!settings.accepting_orders || !item?.active || !item.available || item.in_stock===false || !item.price){notify('This item cannot be ordered right now.');return;}
     setCart(prev=>({...prev,[id]:Math.min(20,(prev[id]||0)+1)}));notify(`${locale==='bn'?item.name_bn:item.name} added to cart`);
   };
   const decrease=(id:string)=>setCart(prev=>{const next={...prev};next[id]=(next[id]||0)-1;if(next[id]<=0)delete next[id];return next;});
