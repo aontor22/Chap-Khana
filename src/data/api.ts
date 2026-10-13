@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { EMPTY_PURCHASES, validateSupplier, validatePurchaseLines, validateReceipt, outstanding, type Supplier, type PurchaseDraftLine, type PurchaseSnapshot, type PurchaseOrder, type PurchaseReceipt, type ReceiptDraftLine } from '../lib/purchasing';
+import { EMPTY_PURCHASES, validateSupplier, validatePurchaseLines, validateReceipt, outstanding, type Supplier, type PurchaseDraftLine, type PurchaseSnapshot, type PurchaseBalance, type PurchaseOrder, type PurchaseReceipt, type ReceiptDraftLine, type PurchaseReturn, type PurchasePayment, type ReturnDraftLine, type SupplierPaymentMethod, validateGoodsReturn, getPurchaseBalance, validateSupplierPayment } from '../lib/purchasing';
 import { EMPTY_INVENTORY, type InventorySnapshot, type Ingredient, type InventoryKind, type RecipeLine } from '../lib/inventory';
 import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
@@ -224,15 +224,31 @@ export const adjustInventoryStock=async(kind:InventoryKind,id:string,delta:numbe
 // Supplier purchasing: staff-only Postgres rows and SECURITY DEFINER RPCs.
 // Goods receiving is atomic with inventory movements, and request IDs are idempotent.
 const PURCHASE_DEMO_KEY='ckr_demo_purchase_v316';
+const demoPurchaseSnapshot=():PurchaseSnapshot=>({...EMPTY_PURCHASES,...fromStorage<Partial<PurchaseSnapshot>>(PURCHASE_DEMO_KEY,EMPTY_PURCHASES),financeAvailable:true,
+  returns:fromStorage<Partial<PurchaseSnapshot>>(PURCHASE_DEMO_KEY,EMPTY_PURCHASES).returns||[],
+  payments:fromStorage<Partial<PurchaseSnapshot>>(PURCHASE_DEMO_KEY,EMPTY_PURCHASES).payments||[]});
+const missingFinanceMigration=(error:{code?:string;message?:string}|null)=>
+  Boolean(error&&(['42P01','PGRST202','PGRST205'].includes(error.code||'')||/could not find.*purchase_(financial_summary|returns|payments)/i.test(error.message||'')));
+
 export const getPurchasingSnapshot=async():Promise<PurchaseSnapshot>=>{
- if(!supabase)return fromStorage(PURCHASE_DEMO_KEY,EMPTY_PURCHASES);
+ if(!supabase){const snap=demoPurchaseSnapshot();return {...snap,balances:snap.orders.map(o=>getPurchaseBalance(o.id,snap.receipts,snap.returns,snap.payments))};}
  const [suppliers,orders,receipts]=await Promise.all([
    db().from('purchase_suppliers').select('*').order('name'),
    db().from('purchase_orders').select('*,purchase_order_lines(*)').order('created_at',{ascending:false}).limit(50),
    db().from('purchase_receipts').select('*,purchase_receipt_lines(*)').order('received_at',{ascending:false}).limit(50)
  ]);
  fail(suppliers.error);fail(orders.error);fail(receipts.error);
- return {suppliers:(suppliers.data||[]) as Supplier[],orders:(orders.data||[]) as PurchaseOrder[],receipts:(receipts.data||[]) as PurchaseReceipt[]};
+ const [returns,payments,balances]=await Promise.all([
+   db().from('purchase_returns').select('id,order_id,receipt_id,request_id,reason,created_at,purchase_return_lines(*)').order('created_at',{ascending:false}).limit(100),
+   db().from('purchase_payments').select('*').order('created_at',{ascending:false}).limit(100),
+   db().rpc('purchase_financial_summary',{p_order_ids:(orders.data||[]).map(o=>o.id).length?(orders.data||[]).map(o=>o.id):[ '00000000-0000-0000-0000-000000000000' ]})
+ ]);
+ const financeErrors=[returns.error,payments.error,balances.error];
+ const unavailable=financeErrors.some(missingFinanceMigration);
+ if(!unavailable)for(const e of financeErrors)fail(e);
+ return {suppliers:(suppliers.data||[]) as Supplier[],orders:(orders.data||[]) as PurchaseOrder[],receipts:(receipts.data||[]) as PurchaseReceipt[],
+   returns:unavailable?[]:(returns.data||[]) as PurchaseReturn[],payments:unavailable?[]:(payments.data||[]) as PurchasePayment[],
+   balances:unavailable?[]:(balances.data||[]) as PurchaseBalance[],financeAvailable:!unavailable};
 };
 export const savePurchaseSupplier=async(input:Supplier,existing:boolean):Promise<void>=>{
  const problem=validateSupplier(input);if(problem)throw new Error(problem);
@@ -272,4 +288,38 @@ export const receivePurchaseOrder=async(order:PurchaseOrder,requestId:string,lin
   saveStorage(PURCHASE_DEMO_KEY,{...snap,orders:snap.orders.map(o=>o.id===order.id?{...o,status:newStatus,purchase_order_lines:edited}:o),receipts:[receipt,...snap.receipts]});return;
  }
  const {error}=await db().rpc('purchase_receive',{p_order:order.id,p_request:requestId,p_lines:lines});fail(error);
+};
+
+// Additive v3.17 procurement ledger. One UUID per user action is reused on network retry.
+export const returnPurchaseGoods=async(receipt:PurchaseReceipt,order:PurchaseOrder,requestId:string,
+  reason:string,lines:ReturnDraftLine[],units:Map<string,string>):Promise<void>=>{
+ if(!reason.trim()||reason.trim().length<3||reason.trim().length>300)throw new Error('A return reason of 3–300 characters is required.');
+ if(supabase){
+  const {error}=await db().rpc('purchase_return_goods',{p_receipt:receipt.id,p_request:requestId,p_reason:reason.trim(),p_lines:lines});fail(error);return;
+ }
+ if(!supabase){
+  const current=demoPurchaseSnapshot();const old=current.returns.find(r=>r.request_id===requestId);
+  if(old){if(old.receipt_id===receipt.id&&old.reason===reason.trim()&&JSON.stringify(old.purchase_return_lines.map(l=>({order_line_id:l.order_line_id,quantity:l.quantity})))===JSON.stringify(lines))return;throw new Error('Return request ID already used.');}
+  const before=current.orders.find(o=>o.id===order.id);if(!before)throw new Error('Purchase order is missing.');
+  const checked=validateGoodsReturn(receipt,lines,current.returns,units,before);if(checked)throw new Error(checked);
+  const inv=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);const deltas=new Map<string,number>();
+  for(const line of lines){const poLine=before.purchase_order_lines.find(x=>x.id===line.order_line_id)!;
+   deltas.set(poLine.ingredient_id,(deltas.get(poLine.ingredient_id)||0)+line.quantity);}
+  for(const [id,qty] of deltas){const ing=inv.ingredients.find(i=>i.id===id);if(!ing||ing.on_hand<qty)throw new Error('Insufficient on-hand stock for supplier return.');}
+  const ret:PurchaseReturn={id:crypto.randomUUID(),order_id:order.id,receipt_id:receipt.id,request_id:requestId,reason:reason.trim(),created_at:new Date().toISOString(),
+   purchase_return_lines:lines.map(line=>({...line,receipt_id:receipt.id,unit_cost_snapshot:receipt.purchase_receipt_lines.find(r=>r.order_line_id===line.order_line_id)!.unit_cost_snapshot}))};
+  saveStorage(DEMO_INV_KEY,{...inv,ingredients:inv.ingredients.map(i=>({...i,on_hand:i.on_hand-(deltas.get(i.id)||0)}))});
+  saveStorage(PURCHASE_DEMO_KEY,{...current,returns:[ret,...current.returns]});return;
+ }
+};
+export const recordSupplierPayment=async(orderId:string,requestId:string,amount:number,
+  method:SupplierPaymentMethod,reference:string,notes:string,paidOn:string):Promise<void>=>{
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(paidOn)||paidOn>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'}))throw new Error('Payment date must not be in the future.');
+ if(supabase){const {error}=await db().rpc('purchase_record_payment',{p_order:orderId,p_request:requestId,p_amount:amount,p_method:method,p_reference:reference,p_notes:notes,p_paid_on:paidOn});fail(error);return;}
+ if(!supabase){const current=demoPurchaseSnapshot();const old=current.payments.find(x=>x.request_id===requestId);
+  if(old){if(old.order_id===orderId&&old.amount===amount&&old.payment_method===method&&old.reference===reference&&old.notes===notes&&old.paid_on===paidOn)return;throw new Error('Payment request ID already used.');}
+  const nowBalance=getPurchaseBalance(orderId,current.receipts,current.returns,current.payments);
+  const check=validateSupplierPayment(amount,method,reference,notes,nowBalance.outstanding_value);if(check)throw new Error(check);
+  saveStorage(PURCHASE_DEMO_KEY,{...current,payments:[{id:crypto.randomUUID(),order_id:orderId,request_id:requestId,amount,payment_method:method,reference,notes,paid_on:paidOn,created_at:new Date().toISOString()},...current.payments]});return;
+ }
 };

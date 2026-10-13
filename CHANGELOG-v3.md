@@ -138,3 +138,10 @@
 - Receiving ingredients increments the existing v3.15 inventory stock and movements atomically; request UUIDs make retries idempotent.
 - Costs are estimates, not recorded supplier payments. No existing customer orders or prices are changed.
 - Added additive SQL migration `15_supplier_purchasing.sql` and source/calculation tests.
+
+## v3.17.0 — Supplier Returns & Payment Ledger
+- Added additive, admin-only supplier goods returns against individual receipt lines; protects against over-return and negative stock, records immutable return values and inventory movements.
+- Added supplier payment ledger with BDT amount, method, date, reference, outstanding cap and idempotent request IDs (no automatic money transfer).
+- Added scoped staff-only financial summary with received/returned/paid/payable/credit balances.
+- Added Purchasing → Returns & payments panel, with demo data and legacy UI compatibility if SQL 16 is pending.
+- New additive SQL migration `16_purchase_returns_payments.sql`, unit/source tests and staging QA guide.

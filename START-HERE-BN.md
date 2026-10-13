@@ -136,3 +136,6 @@ Supabase-এর 01–12 migration আগে থাকতে হবে। `supaba
 ### v3.16.0 — Suppliers and Purchasing
 
 Admin → Purchasing-এ supplier, PO এবং raw ingredient receiving যোগ হয়েছে। Database-এ `14_inventory_management.sql` আগে সফলভাবে run করা থাকতে হবে। নতুন `15_supplier_purchasing.sql` staging-এ run করে stock receipt, partial receiving, repeated request এবং staff-only permissions যাচাই করার পর production-এ প্রয়োগ করবে। বিস্তারিত: `docs/PHASE5-SUPPLIER-PURCHASING-v3.16-BN.md`।
+
+### v3.17.0 — Supplier Returns & Payments
+Admin → Purchasing → **Returns & payments** থেকে নির্দিষ্ট goods receipt-এর ingredient ফেরত এবং supplier-কে বাস্তবে দেওয়া payment record করা যাবে। এটি স্বয়ংক্রিয় টাকা পাঠায় না। SQL `15_supplier_purchasing.sql`-এর পরে `16_purchase_returns_payments.sql` staging-এ run করে testing করবে। পুরোনো orders/receipts অপরিবর্তিত থাকবে। SQL 16 pending থাকলে আগের Purchasing কাজ করবে, নতুন finance tab-এ setup notice দেখাবে। বিস্তারিত `docs/PHASE5-SUPPLIER-FINANCE-v3.17-BN.md`।

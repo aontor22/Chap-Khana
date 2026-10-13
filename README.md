@@ -198,3 +198,6 @@ Inventory settings, ingredient stock/recipe editor, menu serving limits and move
 
 Admin → Purchasing adds suppliers, ingredient purchase drafts, goods receiving and receipt history.
 Run `supabase/migrations/15_supplier_purchasing.sql` **after** migration 14, and test in staging before enabling live purchasing. See `docs/PHASE5-SUPPLIER-PURCHASING-v3.16-BN.md`.
+
+### v3.17 — Supplier finance
+Admin → Purchasing → Returns & payments allows staff to record ingredient returns **against receipts** and log supplier payments already made. No actual payment is processed. Apply `supabase/migrations/16_purchase_returns_payments.sql` **after** migration 15 (prefer staging first). Financial results distinguish purchase value, returns, payments, unpaid balance and supplier credit. Existing purchasing works without SQL 16; finance tab indicates migration is pending. See `docs/PHASE5-SUPPLIER-FINANCE-v3.17-BN.md`.
