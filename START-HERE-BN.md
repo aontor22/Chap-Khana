@@ -1,3 +1,7 @@
+## v3.18 — Kitchen Waste, Expiry Lots, Stocktaking
+
+v3.17.0 code এবং SQL 16 সফলভাবে finish করার পর **SQL 17** (`supabase/migrations/17_waste_expiry_stocktake.sql`) staging-এ পরীক্ষা করে live-এ run করো। Dashboard → Inventory → **Waste, expiry & counts**। নতুন batch-এ expiry initially Unknown থাকে, তাই প্যাকেট দেখে tag করবে। Expired batch অর্ডারে ব্যবহার করা হবে না, কিন্তু disposal automatic নয় — waste manually record করতে হবে। Details: `docs/PHASE5-WASTE-EXPIRY-STOCKTAKE-v3.18-BN.md`।
+
 ## v3.12 Sales Analytics & Reports
 
 Authorized admins can open **Admin → Sales & reports** to review aggregate completed-order value, date trends, popular items, discounts and CSV exports. These figures are not payment reconciliation. Run `supabase/migrations/11_staff_sales_analytics.sql` (after discount and security migrations) for live reporting. See `docs/PHASE4-SALES-REPORTS-v3.12-BN.md` for installation and QA.

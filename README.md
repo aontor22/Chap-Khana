@@ -1,10 +1,14 @@
+## v3.18.0 — Kitchen Waste, Expiry Lots & Physical Stocktaking
+
+Admin → **Inventory → Waste, expiry & counts** now supports FEFO ingredient batches, expiry alerts, actual kitchen waste, and audited physical stocktakes. Deploy source and apply `supabase/migrations/17_waste_expiry_stocktake.sql` **only after** migrations 01–16 and a database backup. It adds an ingredient-movement trigger and adjusts public stock availability; a Supabase staging transaction test is mandatory before live use. See `docs/PHASE5-WASTE-EXPIRY-STOCKTAKE-v3.18-BN.md`.
+
 ## v3.12 Sales Analytics & Reports
 
 Authorized admins can open **Admin → Sales & reports** to review aggregate completed-order value, date trends, popular items, discounts and CSV exports. These figures are not payment reconciliation. Run `supabase/migrations/11_staff_sales_analytics.sql` (after discount and security migrations) for live reporting. See `docs/PHASE4-SALES-REPORTS-v3.12-BN.md` for installation and QA.
 
 # Chap Khana — React + TypeScript restaurant ordering platform
 
-**Version:** 3.2.0 (brand + menu reference photography) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
+**Version:** 3.18.0 (waste, expiry & stocktake; historic sections below describe previous releases) · **Framework:** React 19 / Vite 7 / TypeScript strict / Tailwind 3 · **Backend:** Supabase PostgreSQL/Auth/RPC
 
 This repository is a component-based rebuild of the prior vanilla-JS Chap Khana showcase/ordering prototype. Includes bilingual storefront, live-priced menu, local demo mode, cart, pickup/delivery checkout, idempotent PostgreSQL RPC, order tracking, Google login, account order history, staff dashboard, menu editor and settings.
 

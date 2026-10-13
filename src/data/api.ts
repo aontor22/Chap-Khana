@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { EMPTY_PURCHASES, validateSupplier, validatePurchaseLines, validateReceipt, outstanding, type Supplier, type PurchaseDraftLine, type PurchaseSnapshot, type PurchaseBalance, type PurchaseOrder, type PurchaseReceipt, type ReceiptDraftLine, type PurchaseReturn, type PurchasePayment, type ReturnDraftLine, type SupplierPaymentMethod, validateGoodsReturn, getPurchaseBalance, validateSupplierPayment } from '../lib/purchasing';
+import { EMPTY_STOCK_CONTROL, type StockControlSnapshot } from '../lib/stockControl';
 import { EMPTY_INVENTORY, type InventorySnapshot, type Ingredient, type InventoryKind, type RecipeLine } from '../lib/inventory';
 import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
@@ -219,6 +220,38 @@ export const replaceInventoryRecipe=async(id:string,lines:Array<Pick<RecipeLine,
 export const adjustInventoryStock=async(kind:InventoryKind,id:string,delta:number,reason:string)=>{
  if(!supabase){const old=fromStorage(DEMO_INV_KEY,EMPTY_INVENTORY);if(kind==='ingredient'){const target=old.ingredients.find(i=>i.id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,ingredients:old.ingredients.map(i=>i.id===id?{...i,on_hand:i.on_hand+delta}:i)});}else{const target=old.menuStock.find(i=>i.menu_item_id===id);if(!target||target.on_hand+delta<0)throw new Error('Insufficient stock.');saveStorage(DEMO_INV_KEY,{...old,menuStock:old.menuStock.map(i=>i.menu_item_id===id?{...i,on_hand:i.on_hand+delta}:i)});}return;}
  const {error}=await db().rpc('inventory_adjust_stock',{p_kind:kind,p_id:id,p_delta:delta,p_reason:reason});fail(error);
+};
+
+// v3.18 stock-control: read-only staff lot/count snapshots; every mutation is a protected RPC.
+export const getStockControlSnapshot=async():Promise<StockControlSnapshot>=>{
+ if(!supabase)return EMPTY_STOCK_CONTROL;
+ const [lots,drafts,posted]=await Promise.all([
+  db().from('inventory_expiry_lots').select('*').order('created_at',{ascending:false}).limit(500),
+  db().from('inventory_stocktakes').select('id,status,notes,created_at,posted_at').eq('status','draft').order('created_at',{ascending:false}).limit(1),
+  db().from('inventory_stocktakes').select('id,status,notes,created_at,posted_at').eq('status','posted').order('created_at',{ascending:false}).limit(9)
+ ]);
+ fail(lots.error);fail(drafts.error);fail(posted.error);
+ const draft=(drafts.data||[])[0];
+ let lines:StockControlSnapshot['lines']=[];
+ if(draft){const response=await db().from('inventory_stocktake_lines').select('stocktake_id,ingredient_id,expected_qty,counted_qty').eq('stocktake_id',draft.id).limit(200);
+  fail(response.error);lines=(response.data||[]) as StockControlSnapshot['lines'];}
+ return {available:true,lots:(lots.data||[]) as StockControlSnapshot['lots'],
+  stocktakes:[...(drafts.data||[]),...(posted.data||[])] as StockControlSnapshot['stocktakes'],lines};
+};
+export const tagInventoryLot=async(lot:string,batch:string,expiry:string|null):Promise<void>=>{
+ const {error}=await db().rpc('inventory_tag_lot',{p_lot:lot,p_batch:batch,p_expiry:expiry});fail(error);
+};
+export const splitInventoryLot=async(lot:string,quantity:number,batch:string,expiry:string|null):Promise<void>=>{
+ const {error}=await db().rpc('inventory_split_lot',{p_lot:lot,p_qty:quantity,p_batch:batch,p_expiry:expiry});fail(error);
+};
+export const recordInventoryWaste=async(kind:InventoryKind,id:string,quantity:number,reason:string,lot:string|null,request:string):Promise<void>=>{
+ const {error}=await db().rpc('inventory_record_waste',{p_kind:kind,p_id:id,p_qty:quantity,p_reason:reason,p_lot:lot,p_request:request});fail(error);
+};
+export const startInventoryStocktake=async(notes:string):Promise<string>=>{
+ const {data,error}=await db().rpc('inventory_start_stocktake',{p_notes:notes});fail(error);return String(data);
+};
+export const postInventoryStocktake=async(id:string,counts:Array<{ingredient_id:string;counted:number}>):Promise<void>=>{
+ const {error}=await db().rpc('inventory_post_stocktake',{p_stocktake:id,p_counts:counts});fail(error);
 };
 
 // Supplier purchasing: staff-only Postgres rows and SECURITY DEFINER RPCs.

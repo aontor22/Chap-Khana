@@ -145,3 +145,9 @@
 - Added scoped staff-only financial summary with received/returned/paid/payable/credit balances.
 - Added Purchasing → Returns & payments panel, with demo data and legacy UI compatibility if SQL 16 is pending.
 - New additive SQL migration `16_purchase_returns_payments.sql`, unit/source tests and staging QA guide.
+
+## 3.18.0 — Waste, expiry lot allocation and stocktaking
+- New SQL 17: staff-only expiry lots, FEFO order allocation and cancellation restoration, idempotent waste, physical stocktake with stale-balance guard.
+- Admin Inventory → Waste, expiry & counts: batch tagging/splitting, expiry alerts, actual waste write-offs and full ingredient count sessions.
+- Checkout/supplier movements share the same underlying inventory ledger. Existing historical stock is carried as unknown-expiry opening lots.
+- New source tests and client validation tests; requires SQL 17 and real staging concurrency verification before production.
