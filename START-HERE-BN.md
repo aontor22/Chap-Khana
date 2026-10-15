@@ -1,3 +1,7 @@
+## v3.19 — Kitchen Display (KDS)
+
+Admin → **Kitchen display**-এ pending/confirmed/preparing/ready queue এবং রান্নার নির্দেশনা দেখা যাবে। প্রতি ১২ সেকেন্ডে active queue refresh; staff-only `kitchen_advance_order` atomic RPC। **SQL 18** (`supabase/migrations/18_kitchen_display_workflow.sql`) চালাতে হবে (migration 03 audit অবশ্যই থাকতে হবে)। Production-এ দেওয়ার আগে staging-এ দুই staff-এর concurrent update test করো। বিস্তারিত: `docs/PHASE6-KITCHEN-DISPLAY-v3.19-BN.md`।
+
 ## v3.18 — Kitchen Waste, Expiry Lots, Stocktaking
 
 v3.17.0 code এবং SQL 16 সফলভাবে finish করার পর **SQL 17** (`supabase/migrations/17_waste_expiry_stocktake.sql`) staging-এ পরীক্ষা করে live-এ run করো। Dashboard → Inventory → **Waste, expiry & counts**। নতুন batch-এ expiry initially Unknown থাকে, তাই প্যাকেট দেখে tag করবে। Expired batch অর্ডারে ব্যবহার করা হবে না, কিন্তু disposal automatic নয় — waste manually record করতে হবে। Details: `docs/PHASE5-WASTE-EXPIRY-STOCKTAKE-v3.18-BN.md`।

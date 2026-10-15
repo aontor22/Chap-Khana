@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { EMPTY_PURCHASES, validateSupplier, validatePurchaseLines, validateReceipt, outstanding, type Supplier, type PurchaseDraftLine, type PurchaseSnapshot, type PurchaseBalance, type PurchaseOrder, type PurchaseReceipt, type ReceiptDraftLine, type PurchaseReturn, type PurchasePayment, type ReturnDraftLine, type SupplierPaymentMethod, validateGoodsReturn, getPurchaseBalance, validateSupplierPayment } from '../lib/purchasing';
 import { EMPTY_STOCK_CONTROL, type StockControlSnapshot } from '../lib/stockControl';
+import { kitchenNext, KITCHEN_ACTIVE_STATUSES, type KitchenOrder } from '../lib/kitchen';
 import { EMPTY_INVENTORY, type InventorySnapshot, type Ingredient, type InventoryKind, type RecipeLine } from '../lib/inventory';
 import { DEFAULT_LOYALTY_SETTINGS, EMPTY_LOYALTY_ACCOUNT, validateLoyaltySettings, type LoyaltySettings, type LoyaltySnapshot } from '../lib/loyalty';
 import { fromStorage, saveStorage } from '../lib/utils';
@@ -96,6 +97,41 @@ export const getAdminOrderDetail=async(id:string):Promise<Order>=>{
   if(!supabase){const order=fromStorage<Order[]>('ckr_demo_orders',[]).find(o=>o.id===id);if(!order)throw new Error('Order not found.');return order;}
   const {data,error}=await db().from('orders').select('*,order_items(*)').eq('id',id).single();fail(error);
   if(!data)throw new Error('Order not found.');return data as Order;
+};
+// A dedicated minimal-payload kitchen queue avoids losing active work behind
+// 100 recent completed orders. The orders and items RLS policies remain the gate.
+export const getKitchenQueue=async ():Promise<KitchenOrder[]>=>{
+  if(!supabase)return fromStorage<Order[]>('ckr_demo_orders',[])
+    .filter(o=>(KITCHEN_ACTIVE_STATUSES as readonly string[]).includes(o.status))
+    .sort((a,b)=>a.created_at.localeCompare(b.created_at)).slice(0,100);
+  const {data,error}=await db().from('orders')
+    .select('id,code,status,fulfillment_type,created_at,updated_at,notes,order_items(item_name,qty)')
+    .in('status',[...KITCHEN_ACTIVE_STATUSES])
+    .order('created_at',{ascending:true}).limit(100);
+  fail(error);
+  return (data||[]) as KitchenOrder[];
+};
+export interface KitchenStatusEvent {id:number;previous_status:string;next_status:string;changed_at:string}
+export const getKitchenStatusEvents=async (orderId:string):Promise<KitchenStatusEvent[]>=>{
+  if(!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(orderId))throw new Error('Invalid order ID.');
+  if(!supabase)return [];
+  const {data,error}=await db().from('order_status_events')
+    .select('id,previous_status,next_status,changed_at').eq('order_id',orderId)
+    .order('changed_at',{ascending:false}).limit(12);
+  fail(error);return (data||[]) as KitchenStatusEvent[];
+};
+export const advanceKitchenOrder=async (order:KitchenOrder,next:OrderStatus):Promise<void>=>{
+  if(kitchenNext(order.status,order.fulfillment_type)!==next)throw new Error('Invalid kitchen status change. Refresh the queue.');
+  if(!supabase){const orders=fromStorage<Order[]>('ckr_demo_orders',[]);
+    const stored=orders.find(o=>o.id===order.id);
+    if(!stored||stored.status!==order.status)throw new Error('Order changed. Refresh the queue.');
+    saveStorage('ckr_demo_orders',orders.map(o=>o.id===order.id?{...o,status:next,updated_at:new Date().toISOString()}:o));
+    return;
+  }
+  const {data,error}=await db().rpc('kitchen_advance_order',{
+    p_order:order.id,p_expected_status:order.status,p_next_status:next,
+  });fail(error);
+  if(data!==next)throw new Error('Kitchen status update was not confirmed.');
 };
 export const changeOrderStatus=async (id:string,status:OrderStatus):Promise<void>=>{
   if (!supabase) {saveStorage('ckr_demo_orders',fromStorage<Order[]>('ckr_demo_orders',[]).map(o=>o.id===id?{...o,status}:o));return;}

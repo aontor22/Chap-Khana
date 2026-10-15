@@ -1,3 +1,7 @@
+## v3.19 — Kitchen Display System (KDS)
+
+Admin → **Kitchen display** adds an active preparation queue, 12s visible-tab refresh, secure status transitions, order-item/instruction cards, waiting-time warnings and history. **SQL 18** (`supabase/migrations/18_kitchen_display_workflow.sql`) must be applied after the prior migrations. The migration reuses the existing status log; order/inventory, coupons and loyalty are preserved. See `docs/PHASE6-KITCHEN-DISPLAY-v3.19-BN.md`.
+
 ## v3.18.0 — Kitchen Waste, Expiry Lots & Physical Stocktaking
 
 Admin → **Inventory → Waste, expiry & counts** now supports FEFO ingredient batches, expiry alerts, actual kitchen waste, and audited physical stocktakes. Deploy source and apply `supabase/migrations/17_waste_expiry_stocktake.sql` **only after** migrations 01–16 and a database backup. It adds an ingredient-movement trigger and adjusts public stock availability; a Supabase staging transaction test is mandatory before live use. See `docs/PHASE5-WASTE-EXPIRY-STOCKTAKE-v3.18-BN.md`.

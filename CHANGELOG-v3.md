@@ -1,3 +1,11 @@
+## v3.19.0 — Kitchen Display System (2026-10-14)
+
+- Dedicated authenticated staff Kitchen display: new/confirmed/preparing/ready-and-delivery columns, instructions, oldest-first queue, elapsed minutes, visible-tab polling and mobile view.
+- New SQL 18 `public.kitchen_advance_order` uses row-level lock and expected-status compare-and-set, plus the existing order-status validator, stock and loyalty triggers.
+- Reuses the existing migration-03 `order_status_events` table; no redundant audit log or schema-breaking changes.
+- Staff-controlled status history, duplicate-device conflict protection, pickup vs delivery handoff flow and secure no-PII-first KDS listing.
+- Code and migration require Codespaces full build and Supabase staging transaction tests before rollout.
+
 ## v3.12.0 — Sales Analytics & Reports (2026-10-11)
 
 - New authorized-staff-only Sales & Reports tab on desktop and mobile.
